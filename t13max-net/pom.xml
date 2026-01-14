@@ -7,11 +7,11 @@
         <version>0.1.0</version>
     </parent>
 
-    <groupId>com.t13max.ioc</groupId>
-    <artifactId>t13max-ioc</artifactId>
+    <groupId>com.t13max.net</groupId>
+    <artifactId>t13max-net</artifactId>
     <packaging>jar</packaging>
 
-    <name>t13max-ioc</name>
+    <name>t13max-net</name>
     <url>http://maven.apache.org</url>
 
     <properties>
