@@ -6,7 +6,7 @@ import com.t13max.ioc.core.NestedRuntimeException;
  * @Author: t13max
  * @Since: 23:21 2026/1/14
  */
-public class BeansException extends NestedRuntimeException {
+public abstract class BeansException extends NestedRuntimeException {
 
     public BeansException(String message) {
         super(message);
