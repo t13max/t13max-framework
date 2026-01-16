@@ -1,6 +1,7 @@
 package com.t13max.ioc.beans.factory.support;
 
 import com.t13max.ioc.beans.factory.config.BeanDefinition;
+import com.t13max.ioc.beans.factory.config.BeanDefinitionHolder;
 import com.t13max.ioc.core.ResolvableType;
 import com.t13max.ioc.utils.Assert;
 
@@ -19,7 +20,7 @@ public class RootBeanDefinition extends AbstractBeanDefinition{
     private BeanDefinitionHolder decoratedDefinition;
 
     private AnnotatedElement qualifiedElement;
-    
+    //是否需要重新合并定义
     volatile boolean stale;
 
     boolean allowCaching = true;

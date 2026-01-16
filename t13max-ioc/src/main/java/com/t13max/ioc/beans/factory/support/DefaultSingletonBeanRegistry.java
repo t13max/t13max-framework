@@ -1,7 +1,6 @@
 package com.t13max.ioc.beans.factory.support;
 
-import com.t13max.ioc.beans.factory.BeanCreationException;
-import com.t13max.ioc.beans.factory.ObjectFactory;
+import com.t13max.ioc.beans.factory.*;
 import com.t13max.ioc.beans.factory.config.SingletonBeanRegistry;
 import com.t13max.ioc.core.SimpleAliasRegistry;
 import com.t13max.ioc.utils.Assert;
@@ -15,11 +14,13 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
 /**
+ * 单例注册表默认实现
+ *
  * @Author: t13max
  * @Since: 22:43 2026/1/15
  */
 public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
-    
+
     private static final int SUPPRESSED_EXCEPTIONS_LIMIT = 100;
 
     //单例创建锁
@@ -30,38 +31,38 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
     //单例 三级缓存(对象工厂)
     private final Map<String, ObjectFactory<?>> singletonFactories = new ConcurrentHashMap<>(16);
-    
+
     private final Map<String, Consumer<Object>> singletonCallbacks = new ConcurrentHashMap<>(16);
 
     //单例 二级缓存(早期bean)
     private final Map<String, Object> earlySingletonObjects = new ConcurrentHashMap<>(16);
-    
+
     private final Set<String> registeredSingletons = Collections.synchronizedSet(new LinkedHashSet<>(256));
-    
+
     private final Set<String> singletonsCurrentlyInCreation = ConcurrentHashMap.newKeySet(16);
-    
+
     private final Set<String> inCreationCheckExclusions = ConcurrentHashMap.newKeySet(16);
-    
+
     private final Lock lenientCreationLock = new ReentrantLock();
-    
+
     private final Condition lenientCreationFinished = this.lenientCreationLock.newCondition();
-    
+
     private final Set<String> singletonsInLenientCreation = new HashSet<>();
-    
+
     private final Map<Thread, Thread> lenientWaitingThreads = new HashMap<>();
-    
+
     private final Map<String, Thread> currentCreationThreads = new ConcurrentHashMap<>();
-    
+
     private volatile boolean singletonsCurrentlyInDestruction = false;
-    
+
     private Set<Exception> suppressedExceptions;
-    
+
     private final Map<String, DisposableBean> disposableBeans = new LinkedHashMap<>();
-    
+
     private final Map<String, Set<String>> containedBeanMap = new ConcurrentHashMap<>(16);
-    
+    //依赖映射集合
     private final Map<String, Set<String>> dependentBeanMap = new ConcurrentHashMap<>(64);
-    
+
     private final Map<String, Set<String>> dependenciesForBeanMap = new ConcurrentHashMap<>(64);
 
 
@@ -76,12 +77,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
             this.singletonLock.unlock();
         }
     }
-    
+
     protected void addSingleton(String beanName, Object singletonObject) {
         Object oldObject = this.singletonObjects.putIfAbsent(beanName, singletonObject);
         if (oldObject != null) {
-            throw new IllegalStateException("Could not register object [" + singletonObject +
-                    "] under bean name '" + beanName + "': there is already object [" + oldObject + "] bound");
+            throw new IllegalStateException("Could not register object [" + singletonObject + "] under bean name '" + beanName + "': there is already object [" + oldObject + "] bound");
         }
         this.singletonFactories.remove(beanName);
         this.earlySingletonObjects.remove(beanName);
@@ -92,7 +92,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
             callback.accept(singletonObject);
         }
     }
-    
+
     protected void addSingletonFactory(String beanName, ObjectFactory<?> singletonFactory) {
         Assert.notNull(singletonFactory, "Singleton factory must not be null");
         this.singletonFactories.put(beanName, singletonFactory);
@@ -155,7 +155,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
         }
         return singletonObject;
     }
-    
+
     @SuppressWarnings("NullAway") // Dataflow analysis limitation
     public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
         Assert.notNull(beanName, "Bean name must not be null");
@@ -201,12 +201,10 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
                 }
 
                 if (this.singletonsCurrentlyInDestruction) {
-                    throw new BeanCreationNotAllowedException(beanName,
-                            "Singleton bean creation not allowed while singletons of this factory are in destruction " +
-                                    "(Do not request a bean from a BeanFactory in a destroy method implementation!)");
+                    throw new BeanCreationNotAllowedException(beanName, "Singleton bean creation not allowed while singletons of this factory are in destruction " + "(Do not request a bean from a BeanFactory in a destroy method implementation!)");
                 }
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Creating shared instance of singleton bean '" + beanName + "'");
+                    logger.debug("Creating shared instance of singleton bean '{}'", beanName);
                 }
 
                 try {
@@ -337,7 +335,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
     protected Boolean isCurrentThreadAllowedToHoldSingletonLock() {
         return null;
     }
-    
+
     protected void onSuppressedException(Exception ex) {
         if (this.suppressedExceptions != null && this.suppressedExceptions.size() < SUPPRESSED_EXCEPTIONS_LIMIT) {
             this.suppressedExceptions.add(ex);
@@ -385,30 +383,34 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
     protected boolean isActuallyInCreation(String beanName) {
         return isSingletonCurrentlyInCreation(beanName);
     }
-    
+
     public boolean isSingletonCurrentlyInCreation(String beanName) {
         return this.singletonsCurrentlyInCreation.contains(beanName);
     }
-    
+
+    //创建前验证
     protected void beforeSingletonCreation(String beanName) {
+        //排除的bean是否包含, 添加到当前正在初始化集合
         if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.add(beanName)) {
             throw new BeanCurrentlyInCreationException(beanName);
         }
     }
-    
+
+    //创建后验证
     protected void afterSingletonCreation(String beanName) {
+        //排除的bean是否包含, 移除出当前正在初始化集合
         if (!this.inCreationCheckExclusions.contains(beanName) && !this.singletonsCurrentlyInCreation.remove(beanName)) {
             throw new IllegalStateException("Singleton '" + beanName + "' isn't currently in creation");
         }
     }
 
-    
+
     public void registerDisposableBean(String beanName, DisposableBean bean) {
         synchronized (this.disposableBeans) {
             this.disposableBeans.put(beanName, bean);
         }
     }
-    
+
     public void registerContainedBean(String containedBeanName, String containingBeanName) {
         synchronized (this.containedBeanMap) {
             Set<String> containedBeans =
@@ -419,25 +421,28 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
         }
         registerDependentBean(containedBeanName, containingBeanName);
     }
-    
+
+    //注册依赖关系
     public void registerDependentBean(String beanName, String dependentBeanName) {
+
+        //别名
         String canonicalName = canonicalName(beanName);
 
+        //存入依赖映射
         synchronized (this.dependentBeanMap) {
-            Set<String> dependentBeans =
-                    this.dependentBeanMap.computeIfAbsent(canonicalName, k -> new LinkedHashSet<>(8));
+            Set<String> dependentBeans = this.dependentBeanMap.computeIfAbsent(canonicalName, k -> new LinkedHashSet<>(8));
             if (!dependentBeans.add(dependentBeanName)) {
                 return;
             }
         }
 
         synchronized (this.dependenciesForBeanMap) {
-            Set<String> dependenciesForBean =
-                    this.dependenciesForBeanMap.computeIfAbsent(dependentBeanName, k -> new LinkedHashSet<>(8));
+            Set<String> dependenciesForBean = this.dependenciesForBeanMap.computeIfAbsent(dependentBeanName, k -> new LinkedHashSet<>(8));
             dependenciesForBean.add(canonicalName);
         }
     }
-    
+
+    //是否存在依赖关系
     protected boolean isDependent(String beanName, String dependentBeanName) {
         synchronized (this.dependentBeanMap) {
             return isDependent(beanName, dependentBeanName, null);
@@ -448,6 +453,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
         if (alreadySeen != null && alreadySeen.contains(beanName)) {
             return false;
         }
+        //别名
         String canonicalName = canonicalName(beanName);
         Set<String> dependentBeans = this.dependentBeanMap.get(canonicalName);
         if (dependentBeans == null || dependentBeans.isEmpty()) {
@@ -467,11 +473,11 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
         }
         return false;
     }
-    
+
     protected boolean hasDependentBean(String beanName) {
         return this.dependentBeanMap.containsKey(beanName);
     }
-    
+
     public String[] getDependentBeans(String beanName) {
         Set<String> dependentBeans = this.dependentBeanMap.get(beanName);
         if (dependentBeans == null) {
@@ -481,7 +487,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
             return StringUtils.toStringArray(dependentBeans);
         }
     }
-    
+
     public String[] getDependenciesForBean(String beanName) {
         Set<String> dependenciesForBean = this.dependenciesForBeanMap.get(beanName);
         if (dependenciesForBean == null) {
@@ -517,7 +523,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
             this.singletonLock.unlock();
         }
     }
-    
+
     protected void clearSingletonCache() {
         this.singletonObjects.clear();
         this.singletonFactories.clear();
@@ -525,7 +531,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
         this.registeredSingletons.clear();
         this.singletonsCurrentlyInDestruction = false;
     }
-    
+
     public void destroySingleton(String beanName) {
         // Destroy the corresponding DisposableBean instance.
         // This also triggers the destruction of dependent beans.
@@ -555,7 +561,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
             }
         }
     }
-    
+
     protected void destroyBean(String beanName, DisposableBean bean) {
         // Trigger destruction of dependent beans first...
         Set<String> dependentBeanNames;
@@ -611,9 +617,4 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
         this.dependenciesForBeanMap.remove(beanName);
     }
 
-    @Deprecated(since = "6.2")
-    @Override
-    public final Object getSingletonMutex() {
-        return new Object();
-    }
 }

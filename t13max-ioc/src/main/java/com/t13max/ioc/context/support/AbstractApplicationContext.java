@@ -2,6 +2,7 @@ package com.t13max.ioc.context.support;
 
 import com.t13max.ioc.beans.BeansException;
 import com.t13max.ioc.beans.factory.BeanFactory;
+import com.t13max.ioc.beans.factory.BeanNotOfRequiredTypeException;
 import com.t13max.ioc.beans.factory.NoSuchBeanDefinitionException;
 import com.t13max.ioc.beans.factory.ObjectProvider;
 import com.t13max.ioc.beans.factory.config.AutowireCapableBeanFactory;
@@ -457,8 +458,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
         // Detect a LoadTimeWeaver and prepare for weaving, if found in the meantime
         // (for example, through an @Bean method registered by ConfigurationClassPostProcessor)
-        if (!NativeDetector.inNativeImage() && beanFactory.getTempClassLoader() == null &&
-                beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
+        if (!NativeDetector.inNativeImage() && beanFactory.getTempClassLoader() == null && beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
             beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
             beanFactory.setTempClassLoader(new ContextTypeMatchClassLoader(beanFactory.getBeanClassLoader()));
         }
@@ -473,14 +473,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
             this.messageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
             // Make MessageSource aware of parent MessageSource.
-            if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource hms &&
-                    hms.getParentMessageSource() == null) {
+            if (this.parent != null && this.messageSource instanceof HierarchicalMessageSource hms && hms.getParentMessageSource() == null) {
                 // Only set parent context as parent MessageSource if no parent MessageSource
                 // registered already.
                 hms.setParentMessageSource(getInternalParentMessageSource());
             }
             if (logger.isTraceEnabled()) {
-                logger.trace("Using MessageSource [" + this.messageSource + "]");
+                logger.trace("Using MessageSource [{}]", this.messageSource);
             }
         } else {
             // Use empty MessageSource to be able to accept getMessage calls.
@@ -500,14 +499,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
             this.applicationEventMulticaster =
                     beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
             if (logger.isTraceEnabled()) {
-                logger.trace("Using ApplicationEventMulticaster [" + this.applicationEventMulticaster + "]");
+                logger.trace("Using ApplicationEventMulticaster [{}]", this.applicationEventMulticaster);
             }
         } else {
             this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
             beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
             if (logger.isTraceEnabled()) {
-                logger.trace("No '" + APPLICATION_EVENT_MULTICASTER_BEAN_NAME + "' bean, using " +
-                        "[" + this.applicationEventMulticaster.getClass().getSimpleName() + "]");
+                logger.trace("No '" + APPLICATION_EVENT_MULTICASTER_BEAN_NAME + "' bean, using " + "[" + this.applicationEventMulticaster.getClass().getSimpleName() + "]");
             }
         }
     }
@@ -517,7 +515,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         if (beanFactory.containsLocalBean(LIFECYCLE_PROCESSOR_BEAN_NAME)) {
             this.lifecycleProcessor = beanFactory.getBean(LIFECYCLE_PROCESSOR_BEAN_NAME, LifecycleProcessor.class);
             if (logger.isTraceEnabled()) {
-                logger.trace("Using LifecycleProcessor [" + this.lifecycleProcessor + "]");
+                logger.trace("Using LifecycleProcessor [{}]", this.lifecycleProcessor);
             }
         } else {
             DefaultLifecycleProcessor defaultProcessor = new DefaultLifecycleProcessor();
@@ -525,8 +523,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
             this.lifecycleProcessor = defaultProcessor;
             beanFactory.registerSingleton(LIFECYCLE_PROCESSOR_BEAN_NAME, this.lifecycleProcessor);
             if (logger.isTraceEnabled()) {
-                logger.trace("No '" + LIFECYCLE_PROCESSOR_BEAN_NAME + "' bean, using " +
-                        "[" + this.lifecycleProcessor.getClass().getSimpleName() + "]");
+                logger.trace("No '" + LIFECYCLE_PROCESSOR_BEAN_NAME + "' bean, using " + "[" + this.lifecycleProcessor.getClass().getSimpleName() + "]");
             }
         }
     }
@@ -568,10 +565,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         }
 
         // Initialize conversion service for this context.
-        if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) &&
-                beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)) {
-            beanFactory.setConversionService(
-                    beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
+        if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) && beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)) {
+            beanFactory.setConversionService(beanFactory.getBean(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class));
         }
 
         // Register a default embedded value resolver if no BeanFactoryPostProcessor
