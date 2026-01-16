@@ -1,5 +1,6 @@
 package com.t13max.ioc.beans.factory.config;
 
+import com.t13max.ioc.beans.MutablePropertyValues;
 import com.t13max.ioc.core.ResolvableType;
 
 /**
@@ -12,42 +13,56 @@ public interface BeanDefinition {
 
     String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
 
-    String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;    
+    String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
+
     int ROLE_APPLICATION = 0;
 
-    int ROLE_SUPPORT = 1;    
+    int ROLE_SUPPORT = 1;
+
     int ROLE_INFRASTRUCTURE = 2;
 
-    // Modifiable attributes
+    // 可写
 
-    void setParentName(String parentName);    
+    void setParentName(String parentName);
+
     String getParentName();
 
-    void setBeanClassName(String beanClassName);    
-    String getBeanClassName();    
+    void setBeanClassName(String beanClassName);
+
+    String getBeanClassName();
+
     void setScope(String scope);
 
-    String getScope();    
+    String getScope();
+
     void setLazyInit(boolean lazyInit);
 
-    boolean isLazyInit();    
+    boolean isLazyInit();
+
     void setDependsOn(String ... dependsOn);
 
-    String [] getDependsOn();    
-    void setAutowireCandidate(boolean autowireCandidate);    
+    String [] getDependsOn();
+
+    void setAutowireCandidate(boolean autowireCandidate);
+
     boolean isAutowireCandidate();
 
-    void setPrimary(boolean primary);    
+    void setPrimary(boolean primary);
+
     boolean isPrimary();
 
-    void setFallback(boolean fallback);    
-    boolean isFallback();    
+    void setFallback(boolean fallback);
+
+    boolean isFallback();
+
     void setFactoryBeanName(String factoryBeanName);
 
-    String getFactoryBeanName();    
+    String getFactoryBeanName();
+
     void setFactoryMethodName(String factoryMethodName);
 
-    String getFactoryMethodName();    
+    String getFactoryMethodName();
+
     ConstructorArgumentValues getConstructorArgumentValues();
 
     default boolean hasConstructorArgumentValues() {
@@ -59,8 +74,10 @@ public interface BeanDefinition {
     default boolean hasPropertyValues() {
         return !getPropertyValues().isEmpty();
     }    
-    void setInitMethodName(String initMethodName);    
-    String getInitMethodName();    
+    void setInitMethodName(String initMethodName);
+
+    String getInitMethodName();
+
     void setDestroyMethodName(String destroyMethodName);
 
     String getDestroyMethodName();
@@ -69,17 +86,20 @@ public interface BeanDefinition {
 
     int getRole();
 
-    void setDescription(String description);    
+    void setDescription(String description);
+
     String getDescription();
 
-    // Read-only attributes
+    // 只读
 
-    ResolvableType getResolvableType();    
+    ResolvableType getResolvableType();
+
     boolean isSingleton();
 
     boolean isPrototype();
 
-    boolean isAbstract();    
+    boolean isAbstract();
+
     String getResourceDescription();
 
     BeanDefinition getOriginatingBeanDefinition();

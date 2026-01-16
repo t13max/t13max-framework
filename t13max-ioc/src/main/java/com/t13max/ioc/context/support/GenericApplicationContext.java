@@ -1,12 +1,19 @@
 package com.t13max.ioc.context.support;
 
+import com.t13max.ioc.beans.BeanUtils;
+import com.t13max.ioc.beans.factory.BeanDefinitionStoreException;
+import com.t13max.ioc.beans.factory.BeanRegistrar;
 import com.t13max.ioc.beans.factory.NoSuchBeanDefinitionException;
 import com.t13max.ioc.beans.factory.config.AutowireCapableBeanFactory;
 import com.t13max.ioc.beans.factory.config.BeanDefinition;
+import com.t13max.ioc.beans.factory.config.BeanDefinitionCustomizer;
 import com.t13max.ioc.beans.factory.config.ConfigurableListableBeanFactory;
+import com.t13max.ioc.beans.factory.support.BeanDefinitionRegistry;
+import com.t13max.ioc.beans.factory.support.BeanRegistryAdapter;
 import com.t13max.ioc.beans.factory.support.DefaultListableBeanFactory;
 import com.t13max.ioc.beans.factory.support.RootBeanDefinition;
 import com.t13max.ioc.context.ApplicationContext;
+import com.t13max.ioc.core.io.ProtocolResolver;
 import com.t13max.ioc.core.io.Resource;
 import com.t13max.ioc.core.io.ResourceLoader;
 import com.t13max.ioc.core.io.support.ResourcePatternResolver;
@@ -15,12 +22,10 @@ import com.t13max.ioc.utils.Assert;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
-public class GenericApplicationContext extends AbstractApplicationContext {
+public class GenericApplicationContext extends AbstractApplicationContext implements BeanDefinitionRegistry {
 
     private final DefaultListableBeanFactory beanFactory;
 
@@ -73,7 +78,6 @@ public class GenericApplicationContext extends AbstractApplicationContext {
         this.resourceLoader = resourceLoader;
     }
 
-
     //---------------------------------------------------------------------
     // ResourceLoader / ResourcePatternResolver override if necessary
     //---------------------------------------------------------------------
@@ -114,9 +118,8 @@ public class GenericApplicationContext extends AbstractApplicationContext {
         return super.getClassLoader();
     }
 
-
     //---------------------------------------------------------------------
-    // Implementations of AbstractApplicationContext's template methods
+    // AbstractApplicationContext的模板方法实现
     //---------------------------------------------------------------------
 
     @Override
@@ -154,15 +157,12 @@ public class GenericApplicationContext extends AbstractApplicationContext {
         return this.beanFactory;
     }
 
-
     //---------------------------------------------------------------------
-    // Implementation of BeanDefinitionRegistry
+    // BeanDefinitionRegistry实现
     //---------------------------------------------------------------------
 
     @Override
-    public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
-            throws BeanDefinitionStoreException {
-
+    public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
         this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
     }
 
@@ -201,12 +201,11 @@ public class GenericApplicationContext extends AbstractApplicationContext {
         return this.beanFactory.isAlias(beanName);
     }
 
-
     //---------------------------------------------------------------------
-    // AOT processing
+    // AOT处理
     //---------------------------------------------------------------------
 
-    public void refreshForAotProcessing(RuntimeHints runtimeHints) {
+    /*public void refreshForAotProcessing(RuntimeHints runtimeHints) {
         if (logger.isDebugEnabled()) {
             logger.debug("Preparing bean factory for AOT processing");
         }
@@ -256,8 +255,7 @@ public class GenericApplicationContext extends AbstractApplicationContext {
         }
     }
 
-    private void preDetermineBeanType(String beanName, List<SmartInstantiationAwareBeanPostProcessor> bpps,
-                                      RuntimeHints runtimeHints) {
+    private void preDetermineBeanType(String beanName, List<SmartInstantiationAwareBeanPostProcessor> bpps, RuntimeHints runtimeHints) {
 
         Class<?> beanType = this.beanFactory.getType(beanName);
         if (beanType != null) {
@@ -270,11 +268,10 @@ public class GenericApplicationContext extends AbstractApplicationContext {
                 }
             }
         }
-    }
-
+    }*/
 
     //---------------------------------------------------------------------
-    // Convenient methods for registering individual beans
+    // 注册bean的方法
     //---------------------------------------------------------------------
 
     public <T> void registerBean(Class<T> beanClass, Object... constructorArgs) {
@@ -326,7 +323,6 @@ public class GenericApplicationContext extends AbstractApplicationContext {
             new BeanRegistryAdapter(this.beanFactory, getEnvironment(), registrar.getClass()).register(registrar);
         }
     }
-
 
     @SuppressWarnings("serial")
     private static class ClassDerivedBeanDefinition extends RootBeanDefinition {

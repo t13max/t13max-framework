@@ -2,6 +2,7 @@ package com.t13max.ioc.core.io;
 
 import com.t13max.ioc.utils.Assert;
 import com.t13max.ioc.utils.ClassUtils;
+import com.t13max.ioc.utils.ResourceUtils;
 import com.t13max.ioc.utils.StringUtils;
 
 import java.net.MalformedURLException;
@@ -12,12 +13,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.t13max.ioc.utils.ResourceUtils.CLASSPATH_URL_PREFIX;
+
 /**
+ * 资源加载器默认实现
+ *
  * @Author: t13max
  * @Since: 21:46 2026/1/15
  */
 public class DefaultResourceLoader implements ResourceLoader {
-
 
     private ClassLoader classLoader;
 
@@ -61,6 +65,7 @@ public class DefaultResourceLoader implements ResourceLoader {
 
     @Override
     public Resource getResource(String location) {
+
         Assert.notNull(location, "Location must not be null");
 
         for (ProtocolResolver protocolResolver : getProtocolResolvers()) {

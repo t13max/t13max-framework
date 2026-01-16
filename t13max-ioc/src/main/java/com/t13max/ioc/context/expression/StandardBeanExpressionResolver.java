@@ -2,6 +2,7 @@ package com.t13max.ioc.context.expression;
 
 import com.t13max.ioc.beans.BeansException;
 import com.t13max.ioc.beans.factory.config.BeanExpressionContext;
+import com.t13max.ioc.beans.factory.config.BeanExpressionResolver;
 import com.t13max.ioc.utils.Assert;
 import com.t13max.ioc.utils.StringUtils;
 
@@ -20,8 +21,6 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
     public static final String DEFAULT_EXPRESSION_PREFIX = "#{";
 
     public static final String DEFAULT_EXPRESSION_SUFFIX = "}";
-
-    
     private String expressionPrefix = DEFAULT_EXPRESSION_PREFIX;
 
     private String expressionSuffix = DEFAULT_EXPRESSION_SUFFIX;
@@ -52,8 +51,7 @@ public class StandardBeanExpressionResolver implements BeanExpressionResolver {
     }
 
     public StandardBeanExpressionResolver(ClassLoader beanClassLoader) {
-        SpelParserConfiguration parserConfig = new SpelParserConfiguration(
-                null, beanClassLoader, false, false, Integer.MAX_VALUE, retrieveMaxExpressionLength());
+        SpelParserConfiguration parserConfig = new SpelParserConfiguration(null, beanClassLoader, false, false, Integer.MAX_VALUE, retrieveMaxExpressionLength());
         this.expressionParser = new SpelExpressionParser(parserConfig);
     }
 

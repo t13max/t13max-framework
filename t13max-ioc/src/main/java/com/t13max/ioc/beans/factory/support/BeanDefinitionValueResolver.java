@@ -1,10 +1,8 @@
 package com.t13max.ioc.beans.factory.support;
 
+import com.t13max.ioc.beans.BeanWrapperImpl;
 import com.t13max.ioc.beans.BeansException;
-import com.t13max.ioc.beans.factory.BeanCreationException;
-import com.t13max.ioc.beans.factory.BeanFactory;
-import com.t13max.ioc.beans.factory.BeanFactoryUtils;
-import com.t13max.ioc.beans.factory.FactoryBean;
+import com.t13max.ioc.beans.factory.*;
 import com.t13max.ioc.beans.factory.config.BeanDefinition;
 import com.t13max.ioc.beans.factory.config.BeanDefinitionHolder;
 import com.t13max.ioc.beans.factory.config.DependencyDescriptor;
@@ -30,17 +28,17 @@ public class BeanDefinitionValueResolver {
     private final BeanDefinition beanDefinition;
 
     private final TypeConverter typeConverter;
-
-
-    public BeanDefinitionValueResolver(AbstractAutowireCapableBeanFactory beanFactory, String beanName, BeanDefinition beanDefinition, TypeConverter typeConverter) {
+    
+    public BeanDefinitionValueResolver(AbstractAutowireCapableBeanFactory beanFactory, String beanName,
+                                       BeanDefinition beanDefinition, TypeConverter typeConverter) {
 
         this.beanFactory = beanFactory;
         this.beanName = beanName;
         this.beanDefinition = beanDefinition;
         this.typeConverter = typeConverter;
-    }
-
-    public BeanDefinitionValueResolver(AbstractAutowireCapableBeanFactory beanFactory, String beanName, BeanDefinition beanDefinition) {
+    }    
+    public BeanDefinitionValueResolver(AbstractAutowireCapableBeanFactory beanFactory, String beanName,
+                                       BeanDefinition beanDefinition) {
 
         this.beanFactory = beanFactory;
         this.beanName = beanName;
@@ -49,30 +47,35 @@ public class BeanDefinitionValueResolver {
         beanFactory.initBeanWrapper(beanWrapper);
         this.typeConverter = beanWrapper;
     }
-
-    //解析属性值, 对注入类型进行转换
-    @Nullable
-    public Object resolveValueIfNecessary(Object argName, @Nullable Object value) {
-        // 对引用类型的属性进行解析, RuntimeBeanReference是在对BeanDefinition进行解析时生成的数据对象
+    
+    public  Object resolveValueIfNecessary(Object argName,  Object value) {
+        // We must check each value to see whether it requires a runtime reference
+        // to another bean to be resolved.
         if (value instanceof RuntimeBeanReference ref) {
-            //解析引用类型的属性值
             return resolveReference(argName, ref);
-        } else if (value instanceof RuntimeBeanNameReference ref) {
+        }
+        else if (value instanceof RuntimeBeanNameReference ref) {
             String refName = ref.getBeanName();
             refName = String.valueOf(doEvaluate(refName));
             if (!this.beanFactory.containsBean(refName)) {
-                throw new BeanDefinitionStoreException("Invalid bean name '" + refName + "' in bean reference for " + argName);
+                throw new BeanDefinitionStoreException(
+                        "Invalid bean name '" + refName + "' in bean reference for " + argName);
             }
             return refName;
         }
-        //对BeanDefinitionHolder类型属性的解析, 主要是bean中的内部类
         else if (value instanceof BeanDefinitionHolder bdHolder) {
-            return resolveInnerBean(bdHolder.getBeanName(), bdHolder.getBeanDefinition(), (name, mbd) -> resolveInnerBeanValue(argName, name, mbd));
-        } else if (value instanceof BeanDefinition bd) {
-            return resolveInnerBean(null, bd, (name, mbd) -> resolveInnerBeanValue(argName, name, mbd));
-        } else if (value instanceof DependencyDescriptor dependencyDescriptor) {
+            // Resolve BeanDefinitionHolder: contains BeanDefinition with name and aliases.
+            return resolveInnerBean(bdHolder.getBeanName(), bdHolder.getBeanDefinition(),
+                    (name, mbd) -> resolveInnerBeanValue(argName, name, mbd));
+        }
+        else if (value instanceof BeanDefinition bd) {
+            return resolveInnerBean(null, bd,
+                    (name, mbd) -> resolveInnerBeanValue(argName, name, mbd));
+        }
+        else if (value instanceof DependencyDescriptor dependencyDescriptor) {
             Set<String> autowiredBeanNames = new LinkedHashSet<>(2);
-            Object result = this.beanFactory.resolveDependency(dependencyDescriptor, this.beanName, autowiredBeanNames, this.typeConverter);
+            Object result = this.beanFactory.resolveDependency(
+                    dependencyDescriptor, this.beanName, autowiredBeanNames, this.typeConverter);
             for (String autowiredBeanName : autowiredBeanNames) {
                 if (this.beanFactory.containsBean(autowiredBeanName)) {
                     this.beanFactory.registerDependentBean(autowiredBeanName, this.beanName);
@@ -80,41 +83,44 @@ public class BeanDefinitionValueResolver {
             }
             return result;
         }
-        //对集合数组类型的属性解析
         else if (value instanceof ManagedArray managedArray) {
-            // 获取数组的类型
+            // May need to resolve contained runtime references.
             Class<?> elementType = managedArray.resolvedElementType;
             if (elementType == null) {
-                //获取数组元素类型
                 String elementTypeName = managedArray.getElementTypeName();
                 if (StringUtils.hasText(elementTypeName)) {
                     try {
-                        //使用反射机制创建指定类型的对象
                         elementType = ClassUtils.forName(elementTypeName, this.beanFactory.getBeanClassLoader());
                         managedArray.resolvedElementType = elementType;
-                    } catch (Throwable ex) {
-                        // Improve the message by showing the context.
-                        throw new BeanCreationException(this.beanDefinition.getResourceDescription(), this.beanName, "Error resolving array type for " + argName, ex);
                     }
-                } else {
-                    //没有获取到数组的类型, 也没有获取到数组元素的类型, 则直接设置数组的类型为Object
+                    catch (Throwable ex) {
+                        // Improve the message by showing the context.
+                        throw new BeanCreationException(
+                                this.beanDefinition.getResourceDescription(), this.beanName,
+                                "Error resolving array type for " + argName, ex);
+                    }
+                }
+                else {
                     elementType = Object.class;
                 }
             }
             return resolveManagedArray(argName, (List<?>) value, elementType);
-        } else if (value instanceof ManagedList<?> managedList) {
-            // 解析list类型的属性值
+        }
+        else if (value instanceof ManagedList<?> managedList) {
+            // May need to resolve contained runtime references.
             return resolveManagedList(argName, managedList);
-        } else if (value instanceof ManagedSet<?> managedSet) {
-            // 解析set类型的属性值
+        }
+        else if (value instanceof ManagedSet<?> managedSet) {
+            // May need to resolve contained runtime references.
             return resolveManagedSet(argName, managedSet);
-        } else if (value instanceof ManagedMap<?, ?> managedMap) {
-            // 解析map类型的属性值
+        }
+        else if (value instanceof ManagedMap<?, ?> managedMap) {
+            // May need to resolve contained runtime references.
             return resolveManagedMap(argName, managedMap);
-        } else if (value instanceof ManagedProperties original) {
-            // 解析Properties类型的属性值
+        }
+        else if (value instanceof ManagedProperties original) {
+            // Properties original = managedProperties;
             Properties copy = new Properties();
-            //拷贝, 用作解析后的返回值
             original.forEach((propKey, propValue) -> {
                 if (propKey instanceof TypedStringValue typedStringValue) {
                     propKey = evaluate(typedStringValue);
@@ -130,49 +136,55 @@ public class BeanDefinitionValueResolver {
                 copy.put(propKey, propValue);
             });
             return copy;
-        } else if (value instanceof TypedStringValue typedStringValue) {
-            // 解析字符串类型的属性值
+        }
+        else if (value instanceof TypedStringValue typedStringValue) {
+            // Convert value to target type here.
             Object valueObject = evaluate(typedStringValue);
             try {
-                //获取属性的目标类型
                 Class<?> resolvedTargetType = resolveTargetType(typedStringValue);
                 if (resolvedTargetType != null) {
-                    //对目标类型的属性进行解析, 递归调用
                     return this.typeConverter.convertIfNecessary(valueObject, resolvedTargetType);
-                } else {
-                    //没有获取到属性的目标对象, 则按Object类型返回
+                }
+                else {
                     return valueObject;
                 }
-            } catch (Throwable ex) {
-                // Improve the message by showing the context.
-                throw new BeanCreationException(this.beanDefinition.getResourceDescription(), this.beanName, "Error converting typed String value for " + argName, ex);
             }
-        } else if (value instanceof NullBean) {
+            catch (Throwable ex) {
+                // Improve the message by showing the context.
+                throw new BeanCreationException(
+                        this.beanDefinition.getResourceDescription(), this.beanName,
+                        "Error converting typed String value for " + argName, ex);
+            }
+        }
+        else if (value instanceof NullBean) {
             return null;
-        } else {
+        }
+        else {
             return evaluate(value);
         }
-    }
+    }    
+    public <T> T resolveInnerBean( String innerBeanName, BeanDefinition innerBd,
+                                  BiFunction<String, RootBeanDefinition, T> resolver) {
 
-    public <T> T resolveInnerBean(@Nullable String innerBeanName, BeanDefinition innerBd, BiFunction<String, RootBeanDefinition, T> resolver) {
-        String nameToUse = (innerBeanName != null ? innerBeanName : "(inner bean)" + BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(innerBd));
-        return resolver.apply(nameToUse, this.beanFactory.getMergedBeanDefinition(nameToUse, innerBd, this.beanDefinition));
-    }
-
-    protected Object evaluate(TypedStringValue value) {
+        String nameToUse = (innerBeanName != null ? innerBeanName : "(inner bean)" +
+                BeanFactoryUtils.GENERATED_BEAN_NAME_SEPARATOR + ObjectUtils.getIdentityHexString(innerBd));
+        return resolver.apply(nameToUse,
+                this.beanFactory.getMergedBeanDefinition(nameToUse, innerBd, this.beanDefinition));
+    }    
+    protected  Object evaluate(TypedStringValue value) {
         Object result = doEvaluate(value.getValue());
         if (!ObjectUtils.nullSafeEquals(result, value.getValue())) {
             value.setDynamic();
         }
         return result;
-    }
-
-    protected Object evaluate(@Nullable Object value) {
+    }    
+    protected  Object evaluate( Object value) {
         if (value instanceof String str) {
             return doEvaluate(str);
-        } else if (value instanceof String[] values) {
+        }
+        else if (value instanceof String[] values) {
             boolean actuallyResolved = false;
-            Object[] resolvedValues = new Object[values.length];
+             Object[] resolvedValues = new Object[values.length];
             for (int i = 0; i < values.length; i++) {
                 String originalValue = values[i];
                 Object resolvedValue = doEvaluate(originalValue);
@@ -182,48 +194,48 @@ public class BeanDefinitionValueResolver {
                 resolvedValues[i] = resolvedValue;
             }
             return (actuallyResolved ? resolvedValues : values);
-        } else {
+        }
+        else {
             return value;
         }
-    }
-
-    private Object doEvaluate(@Nullable String value) {
+    }    
+    private  Object doEvaluate( String value) {
         return this.beanFactory.evaluateBeanDefinitionString(value, this.beanDefinition);
-    }
-
-    protected Class<?> resolveTargetType(TypedStringValue value) throws ClassNotFoundException {
+    }    
+    protected  Class<?> resolveTargetType(TypedStringValue value) throws ClassNotFoundException {
         if (value.hasTargetType()) {
             return value.getTargetType();
         }
         return value.resolveTargetType(this.beanFactory.getBeanClassLoader());
-    }
-
-    //解析引用类型的属性值
-    private Object resolveReference(Object argName, RuntimeBeanReference ref) {
+    }    
+    private  Object resolveReference(Object argName, RuntimeBeanReference ref) {
         try {
             Object bean;
             Class<?> beanType = ref.getBeanType();
-            //如果引用的对象在父容器中, 则从父容器中获取指定的引用对象
             if (ref.isToParent()) {
                 BeanFactory parent = this.beanFactory.getParentBeanFactory();
                 if (parent == null) {
-                    throw new BeanCreationException(this.beanDefinition.getResourceDescription(), this.beanName, "Cannot resolve reference to bean " + ref + " in parent factory: no parent factory available");
+                    throw new BeanCreationException(
+                            this.beanDefinition.getResourceDescription(), this.beanName,
+                            "Cannot resolve reference to bean " + ref +
+                                    " in parent factory: no parent factory available");
                 }
                 if (beanType != null) {
                     bean = parent.getBean(beanType);
-                } else {
+                }
+                else {
                     bean = parent.getBean(String.valueOf(doEvaluate(ref.getBeanName())));
                 }
-            } else {
-                //从当前的容器中获取指定的引用bean对象, 如果指定的bean没有被实例化, 则会递归触发引用bean的初始化和依赖注入
+            }
+            else {
                 String resolvedName;
                 if (beanType != null) {
                     NamedBeanHolder<?> namedBean = this.beanFactory.resolveNamedBean(beanType);
                     bean = namedBean.getBeanInstance();
                     resolvedName = namedBean.getBeanName();
-                } else {
+                }
+                else {
                     resolvedName = String.valueOf(doEvaluate(ref.getBeanName()));
-                    //为refName对应的bean注入它所依赖的bean
                     bean = this.beanFactory.getBean(resolvedName);
                 }
                 this.beanFactory.registerDependentBean(resolvedName, this.beanName);
@@ -232,12 +244,14 @@ public class BeanDefinitionValueResolver {
                 bean = null;
             }
             return bean;
-        } catch (BeansException ex) {
-            throw new BeanCreationException(this.beanDefinition.getResourceDescription(), this.beanName, "Cannot resolve reference to bean '" + ref.getBeanName() + "' while setting " + argName, ex);
         }
-    }
-
-    private Object resolveInnerBeanValue(Object argName, String innerBeanName, RootBeanDefinition mbd) {
+        catch (BeansException ex) {
+            throw new BeanCreationException(
+                    this.beanDefinition.getResourceDescription(), this.beanName,
+                    "Cannot resolve reference to bean '" + ref.getBeanName() + "' while setting " + argName, ex);
+        }
+    }    
+    private  Object resolveInnerBeanValue(Object argName, String innerBeanName, RootBeanDefinition mbd) {
         try {
             // Check given bean name whether it is unique. If not already unique,
             // add counter - increasing the counter until the name is unique.
@@ -258,17 +272,22 @@ public class BeanDefinitionValueResolver {
             Object innerBean = this.beanFactory.createBean(actualInnerBeanName, mbd, null);
             if (innerBean instanceof FactoryBean<?> factoryBean) {
                 boolean synthetic = mbd.isSynthetic();
-                innerBean = this.beanFactory.getObjectFromFactoryBean(factoryBean, actualInnerBeanName, !synthetic);
+                innerBean = this.beanFactory.getObjectFromFactoryBean(
+                        factoryBean, null, actualInnerBeanName, !synthetic);
             }
             if (innerBean instanceof NullBean) {
                 innerBean = null;
             }
             return innerBean;
-        } catch (BeansException ex) {
-            throw new BeanCreationException(this.beanDefinition.getResourceDescription(), this.beanName, "Cannot create inner bean '" + innerBeanName + "' " + (mbd.getBeanClassName() != null ? "of type [" + mbd.getBeanClassName() + "] " : "") + "while setting " + argName, ex);
         }
-    }
-
+        catch (BeansException ex) {
+            throw new BeanCreationException(
+                    this.beanDefinition.getResourceDescription(), this.beanName,
+                    "Cannot create inner bean '" + innerBeanName + "' " +
+                            (mbd.getBeanClassName() != null ? "of type [" + mbd.getBeanClassName() + "] " : "") +
+                            "while setting " + argName, ex);
+        }
+    }    
     private String adaptInnerBeanName(String innerBeanName) {
         String actualInnerBeanName = innerBeanName;
         int counter = 0;
@@ -278,40 +297,30 @@ public class BeanDefinitionValueResolver {
             actualInnerBeanName = prefix + counter;
         }
         return actualInnerBeanName;
-    }
-
-    //解析array类型的属性
+    }    
     private Object resolveManagedArray(Object argName, List<?> ml, Class<?> elementType) {
-        //创建一个指定类型的数组, 用于存放和返回解析后的数组
         Object resolved = Array.newInstance(elementType, ml.size());
         for (int i = 0; i < ml.size(); i++) {
-            //递归解析array的每一个元素, 并将解析后的值设置到resolved数组中, 索引为i
             Array.set(resolved, i, resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
         }
         return resolved;
-    }
-
-    //解析list类型的属性
+    }    
     private List<?> resolveManagedList(Object argName, List<?> ml) {
         List<Object> resolved = new ArrayList<>(ml.size());
         for (int i = 0; i < ml.size(); i++) {
             resolved.add(resolveValueIfNecessary(new KeyedArgName(argName, i), ml.get(i)));
         }
         return resolved;
-    }
-
-    //解析set类型的属性
+    }    
     private Set<?> resolveManagedSet(Object argName, Set<?> ms) {
-        Set<Object> resolved = new LinkedHashSet<>(ms.size());
+        Set<Object> resolved = CollectionUtils.newLinkedHashSet(ms.size());
         int i = 0;
         for (Object m : ms) {
             resolved.add(resolveValueIfNecessary(new KeyedArgName(argName, i), m));
             i++;
         }
         return resolved;
-    }
-
-    //解析map类型的属性
+    }    
     private Map<?, ?> resolveManagedMap(Object argName, Map<?, ?> mm) {
         Map<Object, Object> resolved = CollectionUtils.newLinkedHashMap(mm.size());
         mm.forEach((key, value) -> {
@@ -321,7 +330,7 @@ public class BeanDefinitionValueResolver {
         });
         return resolved;
     }
-
+    
     private static class KeyedArgName {
 
         private final Object argName;
@@ -335,7 +344,8 @@ public class BeanDefinitionValueResolver {
 
         @Override
         public String toString() {
-            return this.argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX + this.key + BeanWrapper.PROPERTY_KEY_SUFFIX;
+            return this.argName + " with key " + BeanWrapper.PROPERTY_KEY_PREFIX +
+                    this.key + BeanWrapper.PROPERTY_KEY_SUFFIX;
         }
     }
 

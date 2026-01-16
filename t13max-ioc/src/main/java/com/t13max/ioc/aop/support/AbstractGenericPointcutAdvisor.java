@@ -10,10 +10,6 @@ public class AbstractGenericPointcutAdvisor extends AbstractPointcutAdvisor {
 
     private Advice advice = EMPTY_ADVICE;
 
-
-    /**
-     * Specify the advice that this advisor should apply.
-     */
     public void setAdvice(Advice advice) {
         this.advice = advice;
     }

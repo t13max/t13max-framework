@@ -6,121 +6,87 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public abstract class Assert {
-    
-    @Contract("false, _ -> fail")
+public abstract class Assert {    @Contract("false, _ -> fail")
     public static void state(boolean expression, String message) {
         if (!expression) {
             throw new IllegalStateException(message);
         }
-    }
-    
-    @Contract("false, _ -> fail")
+    }    @Contract("false, _ -> fail")
     public static void state(boolean expression, Supplier<String> messageSupplier) {
         if (!expression) {
             throw new IllegalStateException(nullSafeGet(messageSupplier));
         }
-    }
-    
-    @Contract("false, _ -> fail")
+    }    @Contract("false, _ -> fail")
     public static void isTrue(boolean expression, String message) {
         if (!expression) {
             throw new IllegalArgumentException(message);
         }
-    }
-    
-    @Contract("false, _ -> fail")
+    }    @Contract("false, _ -> fail")
     public static void isTrue(boolean expression, Supplier<String> messageSupplier) {
         if (!expression) {
             throw new IllegalArgumentException(nullSafeGet(messageSupplier));
         }
-    }
-    
-    @Contract("!null, _ -> fail")
+    }    @Contract("!null, _ -> fail")
     public static void isNull(Object object, String message) {
         if (object != null) {
             throw new IllegalArgumentException(message);
         }
-    }
-    
-    @Contract("!null, _ -> fail")
+    }    @Contract("!null, _ -> fail")
     public static void isNull(Object object, Supplier<String> messageSupplier) {
         if (object != null) {
             throw new IllegalArgumentException(nullSafeGet(messageSupplier));
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void notNull(Object object, String message) {
         if (object == null) {
             throw new IllegalArgumentException(message);
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void notNull(Object object, Supplier<String> messageSupplier) {
         if (object == null) {
             throw new IllegalArgumentException(nullSafeGet(messageSupplier));
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void hasLength(String text, String message) {
         if (!StringUtils.hasLength(text)) {
             throw new IllegalArgumentException(message);
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void hasLength(String text, Supplier<String> messageSupplier) {
         if (!StringUtils.hasLength(text)) {
             throw new IllegalArgumentException(nullSafeGet(messageSupplier));
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void hasText(String text, String message) {
         if (!StringUtils.hasText(text)) {
             throw new IllegalArgumentException(message);
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void hasText(String text, Supplier<String> messageSupplier) {
         if (!StringUtils.hasText(text)) {
             throw new IllegalArgumentException(nullSafeGet(messageSupplier));
         }
-    }
-    
-    public static void doesNotContain(String textToSearch, String substring, String message) {
+    }    public static void doesNotContain(String textToSearch, String substring, String message) {
         if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
                 textToSearch.contains(substring)) {
             throw new IllegalArgumentException(message);
         }
-    }
-    
-    public static void doesNotContain(String textToSearch, String substring, Supplier<String> messageSupplier) {
+    }    public static void doesNotContain(String textToSearch, String substring, Supplier<String> messageSupplier) {
         if (StringUtils.hasLength(textToSearch) && StringUtils.hasLength(substring) &&
                 textToSearch.contains(substring)) {
             throw new IllegalArgumentException(nullSafeGet(messageSupplier));
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void notEmpty(Object[] array, String message) {
         if (ObjectUtils.isEmpty(array)) {
             throw new IllegalArgumentException(message);
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void notEmpty(Object[] array, Supplier<String> messageSupplier) {
         if (ObjectUtils.isEmpty(array)) {
             throw new IllegalArgumentException(nullSafeGet(messageSupplier));
         }
-    }
-    
-    public static void noNullElements(Object[] array, String message) {
+    }    public static void noNullElements(Object[] array, String message) {
         if (array != null) {
             for (Object element : array) {
                 if (element == null) {
@@ -128,9 +94,7 @@ public abstract class Assert {
                 }
             }
         }
-    }
-    
-    public static void noNullElements(Object[] array, Supplier<String> messageSupplier) {
+    }    public static void noNullElements(Object[] array, Supplier<String> messageSupplier) {
         if (array != null) {
             for (Object element : array) {
                 if (element == null) {
@@ -138,23 +102,17 @@ public abstract class Assert {
                 }
             }
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void notEmpty(Collection<?> collection, String message) {
         if (CollectionUtils.isEmpty(collection)) {
             throw new IllegalArgumentException(message);
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void notEmpty(Collection<?> collection, Supplier<String> messageSupplier) {
         if (CollectionUtils.isEmpty(collection)) {
             throw new IllegalArgumentException(nullSafeGet(messageSupplier));
         }
-    }
-    
-    public static void noNullElements(Collection<?> collection, String message) {
+    }    public static void noNullElements(Collection<?> collection, String message) {
         if (collection != null) {
             for (Object element : collection) {
                 if (element == null) {
@@ -162,9 +120,7 @@ public abstract class Assert {
                 }
             }
         }
-    }
-    
-    public static void noNullElements(Collection<?> collection, Supplier<String> messageSupplier) {
+    }    public static void noNullElements(Collection<?> collection, Supplier<String> messageSupplier) {
         if (collection != null) {
             for (Object element : collection) {
                 if (element == null) {
@@ -172,60 +128,44 @@ public abstract class Assert {
                 }
             }
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void notEmpty(Map<?, ?> map, String message) {
         if (CollectionUtils.isEmpty(map)) {
             throw new IllegalArgumentException(message);
         }
-    }
-    
-    @Contract("null, _ -> fail")
+    }    @Contract("null, _ -> fail")
     public static void notEmpty(Map<?, ?> map, Supplier<String> messageSupplier) {
         if (CollectionUtils.isEmpty(map)) {
             throw new IllegalArgumentException(nullSafeGet(messageSupplier));
         }
-    }
-    
-    @Contract("_, null, _ -> fail")
+    }    @Contract("_, null, _ -> fail")
     public static void isInstanceOf(Class<?> type, Object obj, String message) {
         notNull(type, "Type to check against must not be null");
         if (!type.isInstance(obj)) {
             instanceCheckFailed(type, obj, message);
         }
-    }
-    
-    @Contract("_, null, _ -> fail")
+    }    @Contract("_, null, _ -> fail")
     public static void isInstanceOf(Class<?> type, Object obj, Supplier<String> messageSupplier) {
         notNull(type, "Type to check against must not be null");
         if (!type.isInstance(obj)) {
             instanceCheckFailed(type, obj, nullSafeGet(messageSupplier));
         }
-    }
-    
-    @Contract("_, null -> fail")
+    }    @Contract("_, null -> fail")
     public static void isInstanceOf(Class<?> type, Object obj) {
         isInstanceOf(type, obj, "");
-    }
-    
-    @Contract("_, null, _ -> fail")
+    }    @Contract("_, null, _ -> fail")
     public static void isAssignable(Class<?> superType, Class<?> subType, String message) {
         notNull(superType, "Supertype to check against must not be null");
         if (subType == null || !superType.isAssignableFrom(subType)) {
             assignableCheckFailed(superType, subType, message);
         }
-    }
-    
-    @Contract("_, null, _ -> fail")
+    }    @Contract("_, null, _ -> fail")
     public static void isAssignable(Class<?> superType, Class<?> subType, Supplier<String> messageSupplier) {
         notNull(superType, "Supertype to check against must not be null");
         if (subType == null || !superType.isAssignableFrom(subType)) {
             assignableCheckFailed(superType, subType, nullSafeGet(messageSupplier));
         }
-    }
-    
-    @Contract("_, null -> fail")
+    }    @Contract("_, null -> fail")
     public static void isAssignable(Class<?> superType, Class<?> subType) {
         isAssignable(superType, subType, "");
     }

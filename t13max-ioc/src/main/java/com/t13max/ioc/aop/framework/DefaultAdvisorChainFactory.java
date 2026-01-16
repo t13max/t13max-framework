@@ -15,17 +15,11 @@ import java.util.List;
  * @since 17:28 2026/1/16
  */
 public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializable {
-
-    /**
-     * Singleton instance of this class.
-     *
-     * @since 6.0.10
-     */
     public static final DefaultAdvisorChainFactory INSTANCE = new DefaultAdvisorChainFactory();
 
 
     @Override
-    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method, @Nullable Class<?> targetClass) {
+    public List<Object> getInterceptorsAndDynamicInterceptionAdvice(Advised config, Method method,  Class<?> targetClass) {
 
         //获取注册器
         AdvisorAdapterRegistry registry = GlobalAdvisorAdapterRegistry.getInstance();

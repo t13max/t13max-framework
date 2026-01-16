@@ -9,12 +9,10 @@ import com.t13max.ioc.utils.Assert;
 public class BeanExpressionContext {
 
     private final ConfigurableBeanFactory beanFactory;
-
-    @Nullable
     private final Scope scope;
 
 
-    public BeanExpressionContext(ConfigurableBeanFactory beanFactory, @Nullable Scope scope) {
+    public BeanExpressionContext(ConfigurableBeanFactory beanFactory,  Scope scope) {
         Assert.notNull(beanFactory, "BeanFactory must not be null");
         this.beanFactory = beanFactory;
         this.scope = scope;
@@ -23,8 +21,6 @@ public class BeanExpressionContext {
     public final ConfigurableBeanFactory getBeanFactory() {
         return this.beanFactory;
     }
-
-    @Nullable
     public final Scope getScope() {
         return this.scope;
     }
@@ -34,8 +30,6 @@ public class BeanExpressionContext {
         return (this.beanFactory.containsBean(key) ||
                 (this.scope != null && this.scope.resolveContextualObject(key) != null));
     }
-
-    @Nullable
     public Object getObject(String key) {
         if (this.beanFactory.containsBean(key)) {
             return this.beanFactory.getBean(key);
@@ -50,7 +44,7 @@ public class BeanExpressionContext {
 
 
     @Override
-    public boolean equals(@Nullable Object other) {
+    public boolean equals( Object other) {
         return (this == other || (other instanceof BeanExpressionContext that &&
                 this.beanFactory == that.beanFactory && this.scope == that.scope));
     }

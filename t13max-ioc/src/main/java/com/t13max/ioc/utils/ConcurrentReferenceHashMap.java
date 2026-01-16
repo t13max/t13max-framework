@@ -27,44 +27,20 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
     private static final int MAXIMUM_CONCURRENCY_LEVEL = 1 << 16;
 
     private static final int MAXIMUM_SEGMENT_SIZE = 1 << 30;
-
-    
-    private final Segment[] segments;
-    
-    private final float loadFactor;
-    
-    private final ReferenceType referenceType;
-    
-    private final int shift;
-    
-    private volatile Set<Map.Entry<K, V>> entrySet;
-
-    
+    private final Segment[] segments;    private final float loadFactor;    private final ReferenceType referenceType;    private final int shift;    private volatile Set<Map.Entry<K, V>> entrySet;
     public ConcurrentReferenceHashMap() {
         this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL, DEFAULT_REFERENCE_TYPE);
-    }
-    
-    public ConcurrentReferenceHashMap(int initialCapacity) {
+    }    public ConcurrentReferenceHashMap(int initialCapacity) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL, DEFAULT_REFERENCE_TYPE);
-    }
-    
-    public ConcurrentReferenceHashMap(int initialCapacity, float loadFactor) {
+    }    public ConcurrentReferenceHashMap(int initialCapacity, float loadFactor) {
         this(initialCapacity, loadFactor, DEFAULT_CONCURRENCY_LEVEL, DEFAULT_REFERENCE_TYPE);
-    }
-    
-    public ConcurrentReferenceHashMap(int initialCapacity, int concurrencyLevel) {
+    }    public ConcurrentReferenceHashMap(int initialCapacity, int concurrencyLevel) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR, concurrencyLevel, DEFAULT_REFERENCE_TYPE);
-    }
-    
-    public ConcurrentReferenceHashMap(int initialCapacity, ReferenceType referenceType) {
+    }    public ConcurrentReferenceHashMap(int initialCapacity, ReferenceType referenceType) {
         this(initialCapacity, DEFAULT_LOAD_FACTOR, DEFAULT_CONCURRENCY_LEVEL, referenceType);
-    }
-    
-    public ConcurrentReferenceHashMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
+    }    public ConcurrentReferenceHashMap(int initialCapacity, float loadFactor, int concurrencyLevel) {
         this(initialCapacity, loadFactor, concurrencyLevel, DEFAULT_REFERENCE_TYPE);
-    }
-    
-    @SuppressWarnings("unchecked")
+    }    @SuppressWarnings("unchecked")
     public ConcurrentReferenceHashMap(
             int initialCapacity, float loadFactor, int concurrencyLevel, ReferenceType referenceType) {
 
@@ -97,13 +73,9 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
 
     protected final Segment getSegment(int index) {
         return this.segments[index];
-    }
-    
-    protected ReferenceManager createReferenceManager() {
+    }    protected ReferenceManager createReferenceManager() {
         return new ReferenceManager();
-    }
-    
-    protected int getHash(Object o) {
+    }    protected int getHash(Object o) {
         int hash = (o != null ? o.hashCode() : 0);
         hash += (hash << 15) ^ 0xffffcd7d;
         hash ^= (hash >>> 10);
@@ -133,9 +105,7 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
         Reference<K, V> ref = getReference(key, Restructure.WHEN_NECESSARY);
         Entry<K, V> entry = (ref != null ? ref.get() : null);
         return (entry != null && ObjectUtils.nullSafeEquals(entry.getKey(), key));
-    }
-    
-    protected final Reference<K, V> getReference(Object key, Restructure restructure) {
+    }    protected final Reference<K, V> getReference(Object key, Restructure restructure) {
         int hash = getHash(key);
         return getSegmentForHash(hash).getReference(key, hash, restructure);
     }
@@ -236,9 +206,7 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
         for (Segment segment : this.segments) {
             segment.clear();
         }
-    }
-    
-    public void purgeUnreferencedEntries() {
+    }    public void purgeUnreferencedEntries() {
         for (Segment segment : this.segments) {
             segment.restructureIfNecessary(false);
         }
@@ -281,9 +249,7 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
 
     private Segment getSegmentForHash(int hash) {
         return this.segments[(hash >>> (32 - this.shift)) & (this.segments.length - 1)];
-    }
-    
-    protected static int calculateShift(int minimumValue, int maximumValue) {
+    }    protected static int calculateShift(int minimumValue, int maximumValue) {
         int shift = 0;
         int value = 1;
         while (value < minimumValue && value < maximumValue) {
@@ -292,8 +258,6 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
         }
         return shift;
     }
-
-    
     public enum ReferenceType {
 
         
@@ -302,8 +266,6 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
         
         WEAK
     }
-
-    
     @SuppressWarnings("serial")
     protected final class Segment extends ReentrantLock {
 
@@ -513,8 +475,6 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
             return this.count.get();
         }
     }
-
-    
     protected interface Reference<K, V> {
 
         
@@ -529,8 +489,6 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
         
         void release();
     }
-
-    
     protected static final class Entry<K, V> implements Map.Entry<K, V> {
 
         private final K key;
@@ -576,8 +534,6 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
             return (this.key + "=" + this.value);
         }
     }
-
-    
     private abstract class Task<T> {
 
         private final EnumSet<TaskOption> options;
@@ -600,21 +556,15 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
             return null;
         }
     }
-
-    
     private enum TaskOption {
 
         RESTRUCTURE_BEFORE, RESTRUCTURE_AFTER, SKIP_IF_EMPTY, RESIZE
     }
-
-    
     private interface Entries<V> {
 
         
         void add(V value);
     }
-
-    
     private class EntrySet extends AbstractSet<Map.Entry<K, V>> {
 
         @Override
@@ -652,8 +602,6 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
             ConcurrentReferenceHashMap.this.clear();
         }
     }
-
-    
     private class EntryIterator implements Iterator<Map.Entry<K, V>> {
 
         private int segmentIndex;
@@ -731,14 +679,10 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
             this.last = null;
         }
     }
-
-    
     protected enum Restructure {
 
         WHEN_NECESSARY, NEVER
     }
-
-    
     protected class ReferenceManager {
 
         private final ReferenceQueue<Entry<K, V>> queue = new ReferenceQueue<>();
@@ -757,8 +701,6 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
             return (Reference<K, V>) this.queue.poll();
         }
     }
-
-    
     private static final class SoftEntryReference<K, V> extends SoftReference<Entry<K, V>> implements Reference<K, V> {
 
         private final int hash;
@@ -788,8 +730,6 @@ public class ConcurrentReferenceHashMap <K, V> extends AbstractMap<K, V> impleme
             enqueue();
         }
     }
-
-    
     private static final class WeakEntryReference<K, V> extends WeakReference<Entry<K, V>> implements Reference<K, V> {
 
         private final int hash;

@@ -10,11 +10,6 @@ import java.lang.reflect.Proxy;
  * @since 16:45 2026/1/16
  */
 public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
-
-    /**
-     * Singleton instance of this class.
-     * @since 6.0.10
-     */
     public static final DefaultAopProxyFactory INSTANCE = new DefaultAopProxyFactory();
 
     private static final long serialVersionUID = 7930414337282325166L;
@@ -38,12 +33,6 @@ public class DefaultAopProxyFactory implements AopProxyFactory, Serializable {
             return new JdkDynamicAopProxy(config);
         }
     }
-
-    /**
-     * Determine whether the supplied {@link AdvisedSupport} has only the
-     * {@link org.springframework.aop.SpringProxy} interface specified
-     * (or no proxy interfaces specified at all).
-     */
     private boolean hasNoUserSuppliedProxyInterfaces(AdvisedSupport config) {
         Class<?>[] ifcs = config.getProxiedInterfaces();
         return (ifcs.length == 0 || (ifcs.length == 1 && SpringProxy.class.isAssignableFrom(ifcs[0])));

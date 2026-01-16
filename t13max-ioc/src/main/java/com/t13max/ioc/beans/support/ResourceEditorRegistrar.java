@@ -1,7 +1,12 @@
 package com.t13max.ioc.beans.support;
 
+import com.t13max.ioc.beans.PropertyEditorRegistrar;
+import com.t13max.ioc.beans.PropertyEditorRegistry;
+import com.t13max.ioc.core.env.PropertyResolver;
+import com.t13max.ioc.core.io.ContextResource;
 import com.t13max.ioc.core.io.Resource;
 import com.t13max.ioc.core.io.ResourceLoader;
+import com.t13max.ioc.core.io.WritableResource;
 import com.t13max.ioc.core.io.support.ResourcePatternResolver;
 import org.xml.sax.InputSource;
 
@@ -56,8 +61,7 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
         if (registry instanceof PropertyEditorRegistrySupport registrySupport) {
             // 属性编辑器覆盖默认的编辑器
             registrySupport.overrideDefaultEditor(requiredType, editor);
-        }
-        else {
+        } else {
             // 注册自定义的属性编辑器
             registry.registerCustomEditor(requiredType, editor);
         }

@@ -28,14 +28,10 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
             throw new NoUniqueBeanDefinitionException(Object.class, 2, "more than 1 matching bean");
         }
         return result;
-    }
-    
-    default T getObject(Object... args) throws BeansException {
+    }    default T getObject(Object... args) throws BeansException {
         throw new UnsupportedOperationException("Retrieval with arguments not supported -" +
                 "for custom ObjectProvider classes, implement getObject(Object...) for your purposes");
-    }
-    
-    default T getIfAvailable() throws BeansException {
+    }    default T getIfAvailable() throws BeansException {
         try {
             return getObject();
         } catch (NoUniqueBeanDefinitionException ex) {
@@ -43,70 +39,46 @@ public interface ObjectProvider<T> extends ObjectFactory<T>, Iterable<T> {
         } catch (NoSuchBeanDefinitionException ex) {
             return null;
         }
-    }
-    
-    default T getIfAvailable(Supplier<T> defaultSupplier) throws BeansException {
+    }    default T getIfAvailable(Supplier<T> defaultSupplier) throws BeansException {
         T dependency = getIfAvailable();
         return (dependency != null ? dependency : defaultSupplier.get());
-    }
-    
-    default void ifAvailable(Consumer<T> dependencyConsumer) throws BeansException {
+    }    default void ifAvailable(Consumer<T> dependencyConsumer) throws BeansException {
         T dependency = getIfAvailable();
         if (dependency != null) {
             dependencyConsumer.accept(dependency);
         }
-    }
-    
-    default T getIfUnique() throws BeansException {
+    }    default T getIfUnique() throws BeansException {
         try {
             return getObject();
         } catch (NoSuchBeanDefinitionException ex) {
             return null;
         }
-    }
-    
-    default T getIfUnique(Supplier<T> defaultSupplier) throws BeansException {
+    }    default T getIfUnique(Supplier<T> defaultSupplier) throws BeansException {
         T dependency = getIfUnique();
         return (dependency != null ? dependency : defaultSupplier.get());
-    }
-    
-    default void ifUnique(Consumer<T> dependencyConsumer) throws BeansException {
+    }    default void ifUnique(Consumer<T> dependencyConsumer) throws BeansException {
         T dependency = getIfUnique();
         if (dependency != null) {
             dependencyConsumer.accept(dependency);
         }
-    }
-    
-    @Override
+    }    @Override
     default Iterator<T> iterator() {
         return stream().iterator();
-    }
-    
-    default Stream<T> stream() {
+    }    default Stream<T> stream() {
         throw new UnsupportedOperationException("Element access not supported - " +
                 "for custom ObjectProvider classes, implement stream() to enable all other methods");
-    }
-    
-    default Stream<T> orderedStream() {
+    }    default Stream<T> orderedStream() {
         return stream().sorted(OrderComparator.INSTANCE);
-    }
-    
-    default Stream<T> stream(Predicate<Class<?>> customFilter) {
+    }    default Stream<T> stream(Predicate<Class<?>> customFilter) {
         return stream(customFilter, true);
-    }
-    
-    default Stream<T> orderedStream(Predicate<Class<?>> customFilter) {
+    }    default Stream<T> orderedStream(Predicate<Class<?>> customFilter) {
         return orderedStream(customFilter, true);
-    }
-    
-    default Stream<T> stream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
+    }    default Stream<T> stream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
         if (!includeNonSingletons) {
             throw new UnsupportedOperationException("Only supports includeNonSingletons=true by default");
         }
         return stream().filter(obj -> customFilter.test(obj.getClass()));
-    }
-    
-    default Stream<T> orderedStream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
+    }    default Stream<T> orderedStream(Predicate<Class<?>> customFilter, boolean includeNonSingletons) {
         if (!includeNonSingletons) {
             throw new UnsupportedOperationException("Only supports includeNonSingletons=true by default");
         }

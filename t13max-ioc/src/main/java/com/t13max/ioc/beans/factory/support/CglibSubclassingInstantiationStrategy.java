@@ -24,17 +24,17 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
     //实例化私有静态内部类, 调用内部类的instantiate()完成实例化
     @Override
-    protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
+    protected Object instantiateWithMethodInjection(RootBeanDefinition bd,  String beanName, BeanFactory owner) {
         return instantiateWithMethodInjection(bd, beanName, owner, null);
     }
 
     @Override
-    protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner, @Nullable Constructor<?> ctor, Object... args) {
+    protected Object instantiateWithMethodInjection(RootBeanDefinition bd,  String beanName, BeanFactory owner,  Constructor<?> ctor, Object... args) {
         return new CglibSubclassCreator(bd, owner).instantiate(ctor, args);
     }
 
     @Override
-    public Class<?> getActualBeanClass(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
+    public Class<?> getActualBeanClass(RootBeanDefinition bd,  String beanName, BeanFactory owner) {
         if (!bd.hasMethodOverrides()) {
             return super.getActualBeanClass(bd, beanName, owner);
         }
@@ -55,7 +55,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
             this.owner = owner;
         }
 
-        public Object instantiate(@Nullable Constructor<?> ctor, Object... args) {
+        public Object instantiate( Constructor<?> ctor, Object... args) {
             Class<?> subclass = createEnhancedSubclass(this.beanDefinition);
             Object instance;
             if (ctor == null) {
@@ -107,7 +107,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
         }
 
         @Override
-        public boolean equals(@Nullable Object other) {
+        public boolean equals( Object other) {
             return (other != null && getClass() == other.getClass() &&
                     this.beanDefinition.equals(((CglibIdentitySupport) other).beanDefinition));
         }
@@ -120,7 +120,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
 
     private static class MethodOverrideCallbackFilter extends CglibIdentitySupport implements CallbackFilter {
 
-        private static final Log logger = LogFactory.getLog(MethodOverrideCallbackFilter.class);
+        private static final Logger logger = LogManager.getLogger(MethodOverrideCallbackFilter.class);
 
         public MethodOverrideCallbackFilter(RootBeanDefinition beanDefinition) {
             super(beanDefinition);
@@ -156,7 +156,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
         }
 
         @Override
-        @Nullable
+        
         public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
             // Cast is safe, as CallbackFilter filters are used selectively.
             LookupOverride lo = (LookupOverride) getBeanDefinition().getMethodOverrides().getOverride(method);
@@ -187,7 +187,7 @@ public class CglibSubclassingInstantiationStrategy extends SimpleInstantiationSt
         }
 
         @Override
-        @Nullable
+        
         public Object intercept(Object obj, Method method, Object[] args, MethodProxy mp) throws Throwable {
             ReplaceOverride ro = (ReplaceOverride) getBeanDefinition().getMethodOverrides().getOverride(method);
             Assert.state(ro != null, "ReplaceOverride not found");

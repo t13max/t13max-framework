@@ -8,31 +8,20 @@ import java.util.*;
  * @Author: t13max
  * @Since: 22:18 2026/1/15
  */
-public class AnnotationUtils {
-    
-    public static final String VALUE = MergedAnnotation.VALUE;
+public class AnnotationUtils {    public static final String VALUE = MergedAnnotation.VALUE;
 
-    private static final AnnotationFilter JAVA_LANG_ANNOTATION_FILTER =
-            AnnotationFilter.packages("java.lang.annotation");
+    private static final AnnotationFilter JAVA_LANG_ANNOTATION_FILTER = AnnotationFilter.packages("java.lang.annotation");
 
-    private static final Map<Class<? extends Annotation>, Map<String, DefaultValueHolder>> defaultValuesCache =
-            new ConcurrentReferenceHashMap<>();
-
-    
-    public static boolean isCandidateClass(Class<?> clazz, Collection<Class<? extends Annotation>> annotationTypes) {
+    private static final Map<Class<? extends Annotation>, Map<String, DefaultValueHolder>> defaultValuesCache = new ConcurrentReferenceHashMap<>();    public static boolean isCandidateClass(Class<?> clazz, Collection<Class<? extends Annotation>> annotationTypes) {
         for (Class<? extends Annotation> annotationType : annotationTypes) {
             if (isCandidateClass(clazz, annotationType)) {
                 return true;
             }
         }
         return false;
-    }
-    
-    public static boolean isCandidateClass(Class<?> clazz,  Class<? extends Annotation> annotationType) {
+    }    public static boolean isCandidateClass(Class<?> clazz,  Class<? extends Annotation> annotationType) {
         return (annotationType != null && isCandidateClass(clazz, annotationType.getName()));
-    }
-    
-    public static boolean isCandidateClass(Class<?> clazz, String annotationName) {
+    }    public static boolean isCandidateClass(Class<?> clazz, String annotationName) {
         if (annotationName.startsWith("java.")) {
             return true;
         }
@@ -40,9 +29,7 @@ public class AnnotationUtils {
             return false;
         }
         return true;
-    }
-    
-    @SuppressWarnings("unchecked")
+    }    @SuppressWarnings("unchecked")
     public static <A extends Annotation>  A getAnnotation(Annotation annotation, Class<A> annotationType) {
         // Shortcut: directly present on the element, with no merging needed?
         if (annotationType.isInstance(annotation)) {
@@ -56,9 +43,7 @@ public class AnnotationUtils {
         return MergedAnnotations.from(annotation, new Annotation[] {annotation}, RepeatableContainers.none())
                 .get(annotationType).withNonMergedAttributes()
                 .synthesize(AnnotationUtils::isSingleLevelPresent).orElse(null);
-    }
-    
-    public static <A extends Annotation>  A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
+    }    public static <A extends Annotation>  A getAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
         // Shortcut: directly present on the element, with no merging needed?
         if (AnnotationFilter.PLAIN.matches(annotationType) ||
                 AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotatedElement)) {
@@ -73,14 +58,10 @@ public class AnnotationUtils {
     private static <A extends Annotation> boolean isSingleLevelPresent(MergedAnnotation<A> mergedAnnotation) {
         int distance = mergedAnnotation.getDistance();
         return (distance == 0 || distance == 1);
-    }
-    
-    public static <A extends Annotation>  A getAnnotation(Method method, Class<A> annotationType) {
+    }    public static <A extends Annotation>  A getAnnotation(Method method, Class<A> annotationType) {
         Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
         return getAnnotation((AnnotatedElement) resolvedMethod, annotationType);
-    }
-    
-    @Deprecated(since = "5.2")
+    }    @Deprecated(since = "5.2")
     public static Annotation  [] getAnnotations(AnnotatedElement annotatedElement) {
         try {
             return synthesizeAnnotationArray(annotatedElement.getAnnotations(), annotatedElement);
@@ -89,9 +70,7 @@ public class AnnotationUtils {
             handleIntrospectionFailure(annotatedElement, ex);
             return null;
         }
-    }
-    
-    @Deprecated(since = "5.2")
+    }    @Deprecated(since = "5.2")
     public static Annotation  [] getAnnotations(Method method) {
         try {
             return synthesizeAnnotationArray(BridgeMethodResolver.findBridgedMethod(method).getAnnotations(), method);
@@ -100,16 +79,12 @@ public class AnnotationUtils {
             handleIntrospectionFailure(method, ex);
             return null;
         }
-    }
-    
-    @Deprecated(since = "5.2")
+    }    @Deprecated(since = "5.2")
     public static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
                                                                          Class<A> annotationType) {
 
         return getRepeatableAnnotations(annotatedElement, annotationType, null);
-    }
-    
-    @Deprecated(since = "5.2")
+    }    @Deprecated(since = "5.2")
     public static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
                                                                          Class<A> annotationType,  Class<? extends Annotation> containerAnnotationType) {
 
@@ -122,16 +97,12 @@ public class AnnotationUtils {
                 .filter(MergedAnnotationPredicates.firstRunOf(MergedAnnotation::getAggregateIndex))
                 .map(MergedAnnotation::withNonMergedAttributes)
                 .collect(MergedAnnotationCollectors.toAnnotationSet());
-    }
-    
-    @Deprecated(since = "5.2")
+    }    @Deprecated(since = "5.2")
     public static <A extends Annotation> Set<A> getDeclaredRepeatableAnnotations(AnnotatedElement annotatedElement,
                                                                                  Class<A> annotationType) {
 
         return getDeclaredRepeatableAnnotations(annotatedElement, annotationType, null);
-    }
-    
-    @Deprecated(since = "5.2")
+    }    @Deprecated(since = "5.2")
     public static <A extends Annotation> Set<A> getDeclaredRepeatableAnnotations(AnnotatedElement annotatedElement,
                                                                                  Class<A> annotationType,  Class<? extends Annotation> containerAnnotationType) {
 
@@ -143,9 +114,7 @@ public class AnnotationUtils {
                 .stream(annotationType)
                 .map(MergedAnnotation::withNonMergedAttributes)
                 .collect(MergedAnnotationCollectors.toAnnotationSet());
-    }
-    
-    public static <A extends Annotation>  A findAnnotation(
+    }    public static <A extends Annotation>  A findAnnotation(
             AnnotatedElement annotatedElement,  Class<A> annotationType) {
 
         if (annotationType == null) {
@@ -162,9 +131,7 @@ public class AnnotationUtils {
         return MergedAnnotations.from(annotatedElement, SearchStrategy.INHERITED_ANNOTATIONS, RepeatableContainers.none())
                 .get(annotationType).withNonMergedAttributes()
                 .synthesize(MergedAnnotation::isPresent).orElse(null);
-    }
-    
-    public static <A extends Annotation>  A findAnnotation(Method method,  Class<A> annotationType) {
+    }    public static <A extends Annotation>  A findAnnotation(Method method,  Class<A> annotationType) {
         if (annotationType == null) {
             return null;
         }
@@ -179,9 +146,7 @@ public class AnnotationUtils {
         return MergedAnnotations.from(method, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
                 .get(annotationType).withNonMergedAttributes()
                 .synthesize(MergedAnnotation::isPresent).orElse(null);
-    }
-    
-    public static <A extends Annotation>  A findAnnotation(Class<?> clazz,  Class<A> annotationType) {
+    }    public static <A extends Annotation>  A findAnnotation(Class<?> clazz,  Class<A> annotationType) {
         if (annotationType == null) {
             return null;
         }
@@ -206,9 +171,7 @@ public class AnnotationUtils {
         return MergedAnnotations.from(clazz, SearchStrategy.TYPE_HIERARCHY, RepeatableContainers.none())
                 .get(annotationType).withNonMergedAttributes()
                 .synthesize(MergedAnnotation::isPresent).orElse(null);
-    }
-    
-    @Deprecated(since = "5.2")
+    }    @Deprecated(since = "5.2")
     public static  Class<?> findAnnotationDeclaringClass(
             Class<? extends Annotation> annotationType,  Class<?> clazz) {
 
@@ -219,9 +182,7 @@ public class AnnotationUtils {
         return (Class<?>) MergedAnnotations.from(clazz, SearchStrategy.SUPERCLASS)
                 .get(annotationType, MergedAnnotation::isDirectlyPresent)
                 .getSource();
-    }
-    
-    @Deprecated(since = "5.2")
+    }    @Deprecated(since = "5.2")
     public static  Class<?> findAnnotationDeclaringClassForTypes(
             List<Class<? extends Annotation>> annotationTypes,  Class<?> clazz) {
 
@@ -233,22 +194,16 @@ public class AnnotationUtils {
                 .filter(MergedAnnotationPredicates.typeIn(annotationTypes).and(MergedAnnotation::isDirectlyPresent))
                 .findFirst().orElse(null);
         return (merged != null && merged.getSource() instanceof Class<?> sourceClass ? sourceClass : null);
-    }
-    
-    public static boolean isAnnotationDeclaredLocally(Class<? extends Annotation> annotationType, Class<?> clazz) {
+    }    public static boolean isAnnotationDeclaredLocally(Class<? extends Annotation> annotationType, Class<?> clazz) {
         return MergedAnnotations.from(clazz).get(annotationType).isDirectlyPresent();
-    }
-    
-    @Deprecated(since = "5.2")
+    }    @Deprecated(since = "5.2")
     public static boolean isAnnotationInherited(Class<? extends Annotation> annotationType, Class<?> clazz) {
         return MergedAnnotations.from(clazz, SearchStrategy.INHERITED_ANNOTATIONS)
                 .stream(annotationType)
                 .filter(MergedAnnotation::isDirectlyPresent)
                 .findFirst().orElseGet(MergedAnnotation::missing)
                 .getAggregateIndex() > 0;
-    }
-    
-    @Deprecated(since = "5.2")
+    }    @Deprecated(since = "5.2")
     public static boolean isAnnotationMetaPresent(Class<? extends Annotation> annotationType,
                                                    Class<? extends Annotation> metaAnnotationType) {
 
@@ -263,43 +218,27 @@ public class AnnotationUtils {
         // Exhaustive retrieval of merged annotations...
         return MergedAnnotations.from(annotationType, SearchStrategy.INHERITED_ANNOTATIONS,
                 RepeatableContainers.none()).isPresent(metaAnnotationType);
-    }
-    
-    public static boolean isInJavaLangAnnotationPackage( Annotation annotation) {
+    }    public static boolean isInJavaLangAnnotationPackage( Annotation annotation) {
         return (annotation != null && JAVA_LANG_ANNOTATION_FILTER.matches(annotation));
-    }
-    
-    public static boolean isInJavaLangAnnotationPackage( String annotationType) {
+    }    public static boolean isInJavaLangAnnotationPackage( String annotationType) {
         return (annotationType != null && JAVA_LANG_ANNOTATION_FILTER.matches(annotationType));
-    }
-    
-    public static void validateAnnotation(Annotation annotation) {
+    }    public static void validateAnnotation(Annotation annotation) {
         AttributeMethods.forAnnotationType(annotation.annotationType()).validate(annotation);
-    }
-    
-    public static Map<String,  Object> getAnnotationAttributes(Annotation annotation) {
+    }    public static Map<String,  Object> getAnnotationAttributes(Annotation annotation) {
         return getAnnotationAttributes(null, annotation);
-    }
-    
-    public static Map<String,  Object> getAnnotationAttributes(
+    }    public static Map<String,  Object> getAnnotationAttributes(
             Annotation annotation, boolean classValuesAsString) {
 
         return getAnnotationAttributes(annotation, classValuesAsString, false);
-    }
-    
-    public static AnnotationAttributes getAnnotationAttributes(
+    }    public static AnnotationAttributes getAnnotationAttributes(
             Annotation annotation, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
         return getAnnotationAttributes(null, annotation, classValuesAsString, nestedAnnotationsAsMap);
-    }
-    
-    public static AnnotationAttributes getAnnotationAttributes(
+    }    public static AnnotationAttributes getAnnotationAttributes(
              AnnotatedElement annotatedElement, Annotation annotation) {
 
         return getAnnotationAttributes(annotatedElement, annotation, false, false);
-    }
-    
-    public static AnnotationAttributes getAnnotationAttributes(
+    }    public static AnnotationAttributes getAnnotationAttributes(
              AnnotatedElement annotatedElement, Annotation annotation,
             boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
@@ -308,9 +247,7 @@ public class AnnotationUtils {
                 .withNonMergedAttributes()
                 .asMap(mergedAnnotation ->
                         new AnnotationAttributes(mergedAnnotation.getType(), true), adaptations);
-    }
-    
-    public static void registerDefaultValues(AnnotationAttributes attributes) {
+    }    public static void registerDefaultValues(AnnotationAttributes attributes) {
         Class<? extends Annotation> annotationType = attributes.annotationType();
         if (annotationType != null && Modifier.isPublic(annotationType.getModifiers()) &&
                 !AnnotationFilter.PLAIN.matches(annotationType)) {
@@ -354,9 +291,7 @@ public class AnnotationUtils {
             }
         }
         return result;
-    }
-    
-    public static void postProcessAnnotationAttributes( Object annotatedElement,
+    }    public static void postProcessAnnotationAttributes( Object annotatedElement,
                                                         AnnotationAttributes attributes, boolean classValuesAsString) {
 
         if (attributes == null) {
@@ -431,13 +366,9 @@ public class AnnotationUtils {
             return synthesized;
         }
         return value;
-    }
-    
-    public static  Object getValue(Annotation annotation) {
+    }    public static  Object getValue(Annotation annotation) {
         return getValue(annotation, VALUE);
-    }
-    
-    public static  Object getValue( Annotation annotation,  String attributeName) {
+    }    public static  Object getValue( Annotation annotation,  String attributeName) {
         if (annotation == null || !StringUtils.hasText(attributeName)) {
             return null;
         }
@@ -452,9 +383,7 @@ public class AnnotationUtils {
             handleValueRetrievalFailure(annotation, ex);
         }
         return null;
-    }
-    
-    static  Object invokeAnnotationMethod(Method method,  Object annotation) {
+    }    static  Object invokeAnnotationMethod(Method method,  Object annotation) {
         if (annotation == null) {
             return null;
         }
@@ -468,15 +397,11 @@ public class AnnotationUtils {
             }
         }
         return ReflectionUtils.invokeMethod(method, annotation);
-    }
-    
-    static void rethrowAnnotationConfigurationException(Throwable ex) {
+    }    static void rethrowAnnotationConfigurationException(Throwable ex) {
         if (ex instanceof AnnotationConfigurationException exception) {
             throw exception;
         }
-    }
-    
-    static void handleIntrospectionFailure(AnnotatedElement element, Throwable ex) {
+    }    static void handleIntrospectionFailure(AnnotatedElement element, Throwable ex) {
         rethrowAnnotationConfigurationException(ex);
         IntrospectionFailureLogger logger = IntrospectionFailureLogger.INFO;
         boolean meta = false;
@@ -489,51 +414,35 @@ public class AnnotationUtils {
             logger.log("Failed to " + (meta ? "meta-introspect annotation " : "introspect annotations on ") +
                     element + ": " + ex);
         }
-    }
-    
-    private static void handleValueRetrievalFailure(Annotation annotation, Throwable ex) {
+    }    private static void handleValueRetrievalFailure(Annotation annotation, Throwable ex) {
         rethrowAnnotationConfigurationException(ex);
         IntrospectionFailureLogger logger = IntrospectionFailureLogger.INFO;
         if (logger.isEnabled()) {
             logger.log("Failed to retrieve value from " + annotation + ": " + ex);
         }
-    }
-    
-    public static  Object getDefaultValue(Annotation annotation) {
+    }    public static  Object getDefaultValue(Annotation annotation) {
         return getDefaultValue(annotation, VALUE);
-    }
-    
-    public static  Object getDefaultValue( Annotation annotation,  String attributeName) {
+    }    public static  Object getDefaultValue( Annotation annotation,  String attributeName) {
         return (annotation != null ? getDefaultValue(annotation.annotationType(), attributeName) : null);
-    }
-    
-    public static  Object getDefaultValue(Class<? extends Annotation> annotationType) {
+    }    public static  Object getDefaultValue(Class<? extends Annotation> annotationType) {
         return getDefaultValue(annotationType, VALUE);
-    }
-    
-    public static  Object getDefaultValue(
+    }    public static  Object getDefaultValue(
              Class<? extends Annotation> annotationType,  String attributeName) {
 
         if (annotationType == null || !StringUtils.hasText(attributeName)) {
             return null;
         }
         return MergedAnnotation.of(annotationType).getDefaultValue(attributeName).orElse(null);
-    }
-    
-    public static <A extends Annotation> A synthesizeAnnotation(
+    }    public static <A extends Annotation> A synthesizeAnnotation(
             A annotation,  AnnotatedElement annotatedElement) {
 
         if (isSynthesizedAnnotation(annotation) || AnnotationFilter.PLAIN.matches(annotation)) {
             return annotation;
         }
         return MergedAnnotation.from(annotatedElement, annotation).synthesize();
-    }
-    
-    public static <A extends Annotation> A synthesizeAnnotation(Class<A> annotationType) {
+    }    public static <A extends Annotation> A synthesizeAnnotation(Class<A> annotationType) {
         return synthesizeAnnotation(Collections.emptyMap(), annotationType, null);
-    }
-    
-    public static <A extends Annotation> A synthesizeAnnotation(Map<String, Object> attributes,
+    }    public static <A extends Annotation> A synthesizeAnnotation(Map<String, Object> attributes,
                                                                 Class<A> annotationType,  AnnotatedElement annotatedElement) {
 
         try {
@@ -542,9 +451,7 @@ public class AnnotationUtils {
         catch (NoSuchElementException | IllegalStateException ex) {
             throw new IllegalArgumentException(ex);
         }
-    }
-    
-    static Annotation[] synthesizeAnnotationArray(Annotation[] annotations, AnnotatedElement annotatedElement) {
+    }    static Annotation[] synthesizeAnnotationArray(Annotation[] annotations, AnnotatedElement annotatedElement) {
         if (AnnotationsScanner.hasPlainJavaAnnotationsOnly(annotatedElement)) {
             return annotations;
         }
@@ -554,9 +461,7 @@ public class AnnotationUtils {
             synthesized[i] = synthesizeAnnotation(annotations[i], annotatedElement);
         }
         return synthesized;
-    }
-    
-    public static boolean isSynthesizedAnnotation( Annotation annotation) {
+    }    public static boolean isSynthesizedAnnotation( Annotation annotation) {
         try {
             return (annotation != null && Proxy.isProxyClass(annotation.getClass()) &&
                     Proxy.getInvocationHandler(annotation) instanceof SynthesizedMergedAnnotationInvocationHandler);
@@ -566,17 +471,13 @@ public class AnnotationUtils {
             // assume the annotation has not been synthesized by Spring.
             return false;
         }
-    }
-    
-    public static void clearCache() {
+    }    public static void clearCache() {
         AnnotationTypeMappings.clearCache();
         AnnotationsScanner.clearCache();
         AttributeMethods.cache.clear();
         RepeatableContainers.cache.clear();
         OrderUtils.orderCache.clear();
     }
-
-    
     private static class DefaultValueHolder {
 
         final Object defaultValue;

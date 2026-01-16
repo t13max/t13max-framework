@@ -228,14 +228,6 @@ public class PostProcessorRegistrationDelegate {
         // moving it to the end of the processor chain (for picking up proxies etc).
         beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(applicationContext));
     }
-
-    /**
-     * Load and sort the post-processors of the specified type.
-     * @param beanFactory the bean factory to use
-     * @param beanPostProcessorType the post-processor type
-     * @param <T> the post-processor type
-     * @return a list of sorted post-processors for the specified type
-     */
     static <T extends BeanPostProcessor> List<T> loadBeanPostProcessors(
             ConfigurableListableBeanFactory beanFactory, Class<T> beanPostProcessorType) {
 
@@ -248,14 +240,6 @@ public class PostProcessorRegistrationDelegate {
         return postProcessors;
 
     }
-
-    /**
-     * Selectively invoke {@link MergedBeanDefinitionPostProcessor} instances
-     * registered in the specified bean factory, resolving bean definitions and
-     * any attributes if necessary as well as any inner bean definitions that
-     * they may contain.
-     * @param beanFactory the bean factory to use
-     */
     static void invokeMergedBeanDefinitionPostProcessors(DefaultListableBeanFactory beanFactory) {
         new MergedBeanDefinitionPostProcessorInvoker(beanFactory).invokeMergedBeanDefinitionPostProcessors();
     }
@@ -274,10 +258,6 @@ public class PostProcessorRegistrationDelegate {
         }
         postProcessors.sort(comparatorToUse);
     }
-
-    /**
-     * Invoke the given BeanDefinitionRegistryPostProcessor beans.
-     */
     private static void invokeBeanDefinitionRegistryPostProcessors(
             Collection<? extends BeanDefinitionRegistryPostProcessor> postProcessors, BeanDefinitionRegistry registry, ApplicationStartup applicationStartup) {
 
@@ -288,10 +268,6 @@ public class PostProcessorRegistrationDelegate {
             postProcessBeanDefRegistry.end();
         }
     }
-
-    /**
-     * Invoke the given BeanFactoryPostProcessor beans.
-     */
     private static void invokeBeanFactoryPostProcessors(Collection<? extends BeanFactoryPostProcessor> postProcessors, ConfigurableListableBeanFactory beanFactory) {
 
         for (BeanFactoryPostProcessor postProcessor : postProcessors) {
@@ -301,10 +277,6 @@ public class PostProcessorRegistrationDelegate {
             postProcessBeanFactory.end();
         }
     }
-
-    /**
-     * Register the given BeanPostProcessor beans.
-     */
     private static void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, List<? extends BeanPostProcessor> postProcessors) {
 
         if (beanFactory instanceof AbstractBeanFactory abstractBeanFactory) {
@@ -318,15 +290,9 @@ public class PostProcessorRegistrationDelegate {
         }
     }
 
-
-    /**
-     * BeanPostProcessor that logs a warn message when a bean is created during
-     * BeanPostProcessor instantiation, i.e. when a bean is not eligible for
-     * getting processed by all BeanPostProcessors.
-     */
     private static final class BeanPostProcessorChecker implements BeanPostProcessor {
 
-        private static final Log logger = LogFactory.getLog(BeanPostProcessorChecker.class);
+        private static final Logger logger = LogManager.getLogger(BeanPostProcessorChecker.class);
 
         private final ConfigurableListableBeanFactory beanFactory;
 
@@ -381,7 +347,7 @@ public class PostProcessorRegistrationDelegate {
             return bean;
         }
 
-        private boolean isInfrastructureBean(@Nullable String beanName) {
+        private boolean isInfrastructureBean( String beanName) {
             if (beanName != null && this.beanFactory.containsBeanDefinition(beanName)) {
                 BeanDefinition bd = this.beanFactory.getBeanDefinition(beanName);
                 return (bd.getRole() == BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -428,7 +394,7 @@ public class PostProcessorRegistrationDelegate {
         }
 
         private void postProcessValue(List<MergedBeanDefinitionPostProcessor> postProcessors,
-                                      BeanDefinitionValueResolver valueResolver, @Nullable Object value) {
+                                      BeanDefinitionValueResolver valueResolver,  Object value) {
             if (value instanceof BeanDefinitionHolder bdh
                     && bdh.getBeanDefinition() instanceof AbstractBeanDefinition innerBd) {
 
