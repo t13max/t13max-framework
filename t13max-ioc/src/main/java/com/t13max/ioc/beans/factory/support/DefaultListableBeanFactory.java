@@ -45,8 +45,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     }
 
 
-    private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories =
-            new ConcurrentHashMap<>(8);
+    private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories = new ConcurrentHashMap<>(8);
 
     private final Boolean strictLocking = SpringProperties.checkFlag(STRICT_LOCKING_PROPERTY_NAME);
 
@@ -73,9 +72,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     private final Map<Class<?>, String[]> allBeanNamesByType = new ConcurrentHashMap<>(64);
 
     private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<>(64);
-
+    //按注册顺序排列的beanDefinition名称列表
     private volatile List<String> beanDefinitionNames = new ArrayList<>(256);
-
+    //
     private volatile Set<String> manualSingletonNames = new LinkedHashSet<>(16);
 
     private volatile String[] frozenBeanDefinitionNames;
@@ -975,26 +974,26 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
     //---------------------------------------------------------------------
-    // Implementation of BeanDefinitionRegistry interface
+    // BeanDefinitionRegistry实现
     //---------------------------------------------------------------------
 
     @Override
-    public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
-            throws BeanDefinitionStoreException {
+    public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) throws BeanDefinitionStoreException {
 
         Assert.hasText(beanName, "Bean name must not be empty");
         Assert.notNull(beanDefinition, "BeanDefinition must not be null");
 
+        //校验解析的BeanDefiniton对象
         if (beanDefinition instanceof AbstractBeanDefinition abd) {
             try {
                 abd.validate();
             } catch (BeanDefinitionValidationException ex) {
-                throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
-                        "Validation of bean definition failed", ex);
+                throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName, "Validation of bean definition failed", ex);
             }
         }
 
         BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+        //检查是否有同名(beanName)的BeanDefinition存在, 存在且不允许覆盖则抛出注册异常, allowBeanDefinitionOverriding默认为true
         if (existingDefinition != null) {
             if (!isBeanDefinitionOverridable(beanName)) {
                 throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
@@ -1003,22 +1002,18 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             }
             this.beanDefinitionMap.put(beanName, beanDefinition);
         } else {
+            //如果允许覆盖同名的bean, 后注册的会覆盖先注册的
             if (isAlias(beanName)) {
                 String aliasedName = canonicalName(beanName);
                 if (!isBeanDefinitionOverridable(aliasedName)) {
                     if (containsBeanDefinition(aliasedName)) {  // alias for existing bean definition
-                        throw new BeanDefinitionOverrideException(
-                                beanName, beanDefinition, getBeanDefinition(aliasedName));
+                        throw new BeanDefinitionOverrideException(beanName, beanDefinition, getBeanDefinition(aliasedName));
                     } else {  // alias pointing to non-existing bean definition
-                        throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName,
-                                "Cannot register bean definition for bean '" + beanName +
-                                        "' since there is already an alias for bean '" + aliasedName + "' bound.");
+                        throw new BeanDefinitionStoreException(beanDefinition.getResourceDescription(), beanName, "Cannot register bean definition for bean '" + beanName + "' since there is already an alias for bean '" + aliasedName + "' bound.");
                     }
                 } else {
                     if (logger.isInfoEnabled()) {
-                        logger.info("Removing alias '" + beanName + "' for bean '" + aliasedName +
-                                "' due to registration of bean definition for bean '" + beanName + "': [" +
-                                beanDefinition + "]");
+                        logger.info("Removing alias '" + beanName + "' for bean '" + aliasedName + "' due to registration of bean definition for bean '" + beanName + "': [" + beanDefinition + "]");
                     }
                     removeAlias(beanName);
                 }

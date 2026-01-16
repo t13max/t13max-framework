@@ -170,6 +170,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
                 // 创建实例
                 if (mbd.isSingleton()) {
+                    //获取单例, 传入创建Bean的函数
                     sharedInstance = getSingleton(beanName, () -> {
                         try {
                             return createBean(beanName, mbd, args);
@@ -181,27 +182,37 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                             throw ex;
                         }
                     });
+                    // 获取给定 bean 的实例对象
                     beanInstance = getObjectForBeanInstance(sharedInstance, requiredType, name, beanName, mbd);
                 } else if (mbd.isPrototype()) {
-                    // It's a prototype -> create a new instance.
+                    //原型模式 每次创建新的
                     Object prototypeInstance = null;
                     try {
+                        //回调beforePrototypeCreation()方法，默认的功能是注册当前创建的原型对象
                         beforePrototypeCreation(beanName);
+                        // 创建指定bean对象实例
                         prototypeInstance = createBean(beanName, mbd, args);
                     } finally {
+                        //回调afterPrototypeCreation()方法, 默认的功能是告诉IoC容器
                         afterPrototypeCreation(beanName);
                     }
+                    //获取给定bean的实例对象
                     beanInstance = getObjectForBeanInstance(prototypeInstance, requiredType, name, beanName, mbd);
                 } else {
+                    //要创建的bean既不是单例模式, 也不是原型模式, 则根据该bean元素在配置文件中配置的生命周期范围选择实例化bean的合适方法
+
+                    //获取此 bean 生命周期的范围
                     String scopeName = mbd.getScope();
                     if (!StringUtils.hasLength(scopeName)) {
                         throw new IllegalStateException("No scope name defined for bean '" + beanName + "'");
                     }
+                    //bean定义资源中没有配置生命周期范围, 则该bean的配置不合法
                     Scope scope = this.scopes.get(scopeName);
                     if (scope == null) {
                         throw new IllegalStateException("No Scope registered for scope name '" + scopeName + "'");
                     }
                     try {
+                        //使用ObjectFactory的匿名内部类, 获取一个指定生命周期范围的实例
                         Object scopedInstance = scope.get(beanName, () -> {
                             beforePrototypeCreation(beanName);
                             try {
@@ -210,6 +221,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                                 afterPrototypeCreation(beanName);
                             }
                         });
+                        //获取给定bean的实例对象
                         beanInstance = getObjectForBeanInstance(scopedInstance, requiredType, name, beanName, mbd);
                     } catch (IllegalStateException ex) {
                         throw new ScopeNotActiveException(beanName, scopeName, ex);
@@ -231,6 +243,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         return adaptBeanInstance(name, beanInstance, requiredType);
     }
 
+    //对要返回的bean实例对象进行非空验证和类型检查, 如果没问题就返回这个已经完成, 依赖注入的bean
     @SuppressWarnings("unchecked")
     <T> T adaptBeanInstance(String name, Object bean, Class<?> requiredType) {
         // Check if required type matches the type of the actual bean instance.
@@ -243,8 +256,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                 return (T) convertedBean;
             } catch (TypeMismatchException ex) {
                 if (logger.isTraceEnabled()) {
-                    logger.trace("Failed to convert bean '" + name + "' to required type '" +
-                            ClassUtils.getQualifiedName(requiredType) + "'", ex);
+                    logger.trace("Failed to convert bean '" + name + "' to required type '" + ClassUtils.getQualifiedName(requiredType) + "'", ex);
                 }
                 throw new BeanNotOfRequiredTypeException(name, requiredType, bean.getClass());
             }
@@ -1019,11 +1031,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 
     protected void initBeanWrapper(BeanWrapper bw) {
+        // 设置转换服务
         bw.setConversionService(getConversionService());
+        // 注册自定义属性编辑器
         registerCustomEditors(bw);
     }
 
-
+    // 注册自定义属性编辑器
     protected void registerCustomEditors(PropertyEditorRegistry registry) {
         if (registry instanceof PropertyEditorRegistrySupport registrySupport) {
             registrySupport.useConfigValueEditors();
@@ -1040,14 +1054,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
             applyEditorRegistrars(registry, this.propertyEditorRegistrars);
         }
         if (!this.customEditors.isEmpty()) {
-            this.customEditors.forEach((requiredType, editorClass) ->
-                    registry.registerCustomEditor(requiredType, BeanUtils.instantiateClass(editorClass)));
+            this.customEditors.forEach((requiredType, editorClass) -> registry.registerCustomEditor(requiredType, BeanUtils.instantiateClass(editorClass)));
         }
     }
 
     private void applyEditorRegistrars(PropertyEditorRegistry registry, Set<PropertyEditorRegistrar> registrars) {
         for (PropertyEditorRegistrar registrar : registrars) {
             try {
+                // 属性编辑器, 注册自定义属性编辑器
                 registrar.registerCustomEditors(registry);
             } catch (BeanCreationException ex) {
                 Throwable rootCause = ex.getMostSpecificCause();
@@ -1055,9 +1069,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
                     String bceBeanName = bce.getBeanName();
                     if (bceBeanName != null && isCurrentlyInCreation(bceBeanName)) {
                         if (logger.isDebugEnabled()) {
-                            logger.debug("PropertyEditorRegistrar [" + registrar.getClass().getName() +
-                                    "] failed because it tried to obtain currently created bean '" +
-                                    ex.getBeanName() + "': " + ex.getMessage());
+                            logger.debug("PropertyEditorRegistrar [" + registrar.getClass().getName() + "] failed because it tried to obtain currently created bean '" + ex.getBeanName() + "': " + ex.getMessage());
                         }
                         onSuppressedException(ex);
                         return;
@@ -1198,14 +1210,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         });
     }
 
-
-    protected Class<?> resolveBeanClass(RootBeanDefinition mbd, String beanName, Class<?>... typesToMatch)
-            throws CannotLoadBeanClassException {
+    //获取Bean的Class
+    protected Class<?> resolveBeanClass(RootBeanDefinition mbd, String beanName, Class<?>... typesToMatch) throws CannotLoadBeanClassException {
 
         try {
+            // 是否包含 bean 类型
             if (mbd.hasBeanClass()) {
+                //直接返回
                 return mbd.getBeanClass();
             }
+            // 从BeanDefinition中获取
             Class<?> beanClass = doResolveBeanClass(mbd, typesToMatch);
             if (mbd.hasBeanClass()) {
                 mbd.prepareMethodOverrides();
@@ -1216,18 +1230,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         } catch (LinkageError err) {
             throw new CannotLoadBeanClassException(mbd.getResourceDescription(), beanName, mbd.getBeanClassName(), err);
         } catch (BeanDefinitionValidationException ex) {
-            throw new BeanDefinitionStoreException(mbd.getResourceDescription(),
-                    beanName, "Validation of method overrides failed", ex);
+            throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName, "Validation of method overrides failed", ex);
         }
     }
 
-    private Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>... typesToMatch)
-            throws ClassNotFoundException {
+    private Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>... typesToMatch) throws ClassNotFoundException {
 
         ClassLoader beanClassLoader = getBeanClassLoader();
         ClassLoader dynamicLoader = beanClassLoader;
         boolean freshResolve = false;
-
+        // 判断 typesToMatch 是否为空
         if (!ObjectUtils.isEmpty(typesToMatch)) {
             // When just doing type checks (i.e. not creating an actual instance yet),
             // use the specified temporary class loader (for example, in a weaving scenario).
@@ -1235,8 +1247,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
             if (tempClassLoader != null) {
                 dynamicLoader = tempClassLoader;
                 freshResolve = true;
+                //类型比较
                 if (tempClassLoader instanceof DecoratingClassLoader dcl) {
                     for (Class<?> typeToMatch : typesToMatch) {
+                        // 添加排除的类
                         dcl.excludeClass(typeToMatch.getName());
                     }
                 }
@@ -1245,6 +1259,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
         String className = mbd.getBeanClassName();
         if (className != null) {
+            //bean属性值
             Object evaluated = evaluateBeanDefinitionString(className, mbd);
             if (!className.equals(evaluated)) {
                 // A dynamically resolved expression, supported as of 4.2...
@@ -1279,17 +1294,21 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 
     protected Object evaluateBeanDefinitionString(String value, BeanDefinition beanDefinition) {
+        //占位符解析
         if (this.beanExpressionResolver == null) {
             return value;
         }
 
         Scope scope = null;
         if (beanDefinition != null) {
+            //获取scope
             String scopeName = beanDefinition.getScope();
             if (scopeName != null) {
+                // scope 转换成接口值
                 scope = getRegisteredScope(scopeName);
             }
         }
+        //返回对象
         return this.beanExpressionResolver.evaluate(value, new BeanExpressionContext(this, scope));
     }
 

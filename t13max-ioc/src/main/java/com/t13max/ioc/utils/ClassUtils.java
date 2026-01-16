@@ -764,9 +764,9 @@ public abstract class ClassUtils {
 		return getInterfaceMethodIfPossible(method, targetClass, false);
 	}
 
-	private static Method getInterfaceMethodIfPossible(Method method, Class<?> targetClass,
-			boolean requirePublicInterface) {
+	private static Method getInterfaceMethodIfPossible(Method method, Class<?> targetClass, boolean requirePublicInterface) {
 
+		//是不是public 是不是接口
 		Class<?> declaringClass = method.getDeclaringClass();
 		if (!Modifier.isPublic(method.getModifiers()) || (declaringClass.isInterface() &&
 				(!requirePublicInterface || Modifier.isPublic(declaringClass.getModifiers())))) {
@@ -776,7 +776,7 @@ public abstract class ClassUtils {
 		Class<?>[] parameterTypes = method.getParameterTypes();
 
 		Map<Method, Method> methodCache = (requirePublicInterface ? publicInterfaceMethodCache : interfaceMethodCache);
-		// Try cached version of method in its declaring class
+		//放入方法缓存
 		Method result = methodCache.computeIfAbsent(method, key -> findInterfaceMethodIfPossible(
 				methodName, parameterTypes, declaringClass, Object.class, requirePublicInterface));
 		if (result == null && targetClass != null) {
@@ -789,14 +789,15 @@ public abstract class ClassUtils {
 		return (result != null ? result : method);
 	}
 
-	private static Method findInterfaceMethodIfPossible(String methodName, Class<?>[] parameterTypes,
-			Class<?> startClass, Class<?> endClass, boolean requirePublicInterface) {
+	private static Method findInterfaceMethodIfPossible(String methodName, Class<?>[] parameterTypes, Class<?> startClass, Class<?> endClass, boolean requirePublicInterface) {
 
 		Class<?> current = startClass;
 		while (current != null && current != endClass) {
+			// 当前类的接口列表
 			for (Class<?> ifc : current.getInterfaces()) {
 				try {
 					if (!requirePublicInterface || Modifier.isPublic(ifc.getModifiers())) {
+						// 从接口中获取方法
 						return ifc.getMethod(methodName, parameterTypes);
 					}
 				}
