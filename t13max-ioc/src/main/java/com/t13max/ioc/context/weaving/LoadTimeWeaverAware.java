@@ -1,6 +1,7 @@
 package com.t13max.ioc.context.weaving;
 
 import com.t13max.ioc.beans.factory.Aware;
+import com.t13max.ioc.instrument.classloading.LoadTimeWeaver;
 
 /**
  * @Author: t13max

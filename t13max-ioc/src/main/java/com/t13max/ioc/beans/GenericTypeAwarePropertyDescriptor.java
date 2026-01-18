@@ -3,9 +3,9 @@ package com.t13max.ioc.beans;
 import com.t13max.ioc.core.BridgeMethodResolver;
 import com.t13max.ioc.core.MethodParameter;
 import com.t13max.ioc.core.ResolvableType;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ClassUtils;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ClassUtils;
+import com.t13max.ioc.util.StringUtils;
 
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;

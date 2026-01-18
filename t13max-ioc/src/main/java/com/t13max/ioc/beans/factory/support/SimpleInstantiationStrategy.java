@@ -2,8 +2,8 @@ package com.t13max.ioc.beans.factory.support;
 
 import com.t13max.ioc.beans.factory.BeanFactory;
 import com.t13max.ioc.beans.factory.config.ConfigurableBeanFactory;
-import com.t13max.ioc.utils.ReflectionUtils;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.ReflectionUtils;
+import com.t13max.ioc.util.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

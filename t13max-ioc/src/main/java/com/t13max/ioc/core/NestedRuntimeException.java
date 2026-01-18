@@ -1,5 +1,7 @@
 package com.t13max.ioc.core;
 
+import com.t13max.ioc.core.testfixture.nullness.custom.Nullable;
+
 /**
  * 
  * @Author: t13max
@@ -24,6 +26,15 @@ public abstract class NestedRuntimeException extends RuntimeException {
 
     public NestedRuntimeException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
         super(message, cause, enableSuppression, writableStackTrace);
+    }
+
+    public Throwable getRootCause() {
+        return NestedExceptionUtils.getRootCause(this);
+    }
+
+    public Throwable getMostSpecificCause() {
+        Throwable rootCause = getRootCause();
+        return (rootCause != null ? rootCause : this);
     }
 
     public boolean contains(Class<?> exType) {

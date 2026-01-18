@@ -5,7 +5,7 @@ import com.t13max.ioc.beans.factory.config.BeanDefinition;
 import com.t13max.ioc.beans.factory.config.BeanDefinitionHolder;
 import com.t13max.ioc.beans.factory.config.ConstructorArgumentValues;
 import com.t13max.ioc.core.ResolvableType;
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 
 import java.lang.reflect.*;
 import java.util.Collections;

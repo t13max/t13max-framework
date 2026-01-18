@@ -1,6 +1,6 @@
 package com.t13max.ioc.core;
 
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;

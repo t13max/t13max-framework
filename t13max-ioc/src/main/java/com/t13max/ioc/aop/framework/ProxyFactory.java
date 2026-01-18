@@ -2,7 +2,7 @@ package com.t13max.ioc.aop.framework;
 
 import com.t13max.ioc.aop.TargetSource;
 import com.t13max.ioc.aop.intecept.Interceptor;
-import com.t13max.ioc.utils.ClassUtils;
+import com.t13max.ioc.util.ClassUtils;
 
 /**
  * @Author: t13max

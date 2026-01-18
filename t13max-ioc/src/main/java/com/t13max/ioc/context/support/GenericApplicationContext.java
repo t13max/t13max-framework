@@ -18,7 +18,7 @@ import com.t13max.ioc.core.io.Resource;
 import com.t13max.ioc.core.io.ResourceLoader;
 import com.t13max.ioc.core.io.support.ResourcePatternResolver;
 import com.t13max.ioc.core.metrics.ApplicationStartup;
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;

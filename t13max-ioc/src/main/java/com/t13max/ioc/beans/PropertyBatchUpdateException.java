@@ -1,7 +1,7 @@
 package com.t13max.ioc.beans;
 
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ObjectUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ObjectUtils;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;

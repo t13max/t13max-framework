@@ -4,9 +4,9 @@ import com.t13max.ioc.beans.factory.BeanDefinitionStoreException;
 import com.t13max.ioc.beans.factory.BeanFactoryUtils;
 import com.t13max.ioc.beans.factory.config.BeanDefinition;
 import com.t13max.ioc.beans.factory.config.BeanDefinitionHolder;
-import com.t13max.ioc.utils.ClassUtils;
-import com.t13max.ioc.utils.ObjectUtils;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.ClassUtils;
+import com.t13max.ioc.util.ObjectUtils;
+import com.t13max.ioc.util.StringUtils;
 
 /**
  * @Author: t13max

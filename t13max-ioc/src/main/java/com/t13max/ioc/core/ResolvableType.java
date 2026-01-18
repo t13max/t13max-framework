@@ -1,6 +1,6 @@
 package com.t13max.ioc.core;
 
-import com.t13max.ioc.utils.*;
+import com.t13max.ioc.util.*;
 import com.t13max.ioc.core.SerializableTypeWrapper.TypeProvider;
 import com.t13max.ioc.core.SerializableTypeWrapper.FieldTypeProvider;
 import com.t13max.ioc.core.SerializableTypeWrapper.MethodParameterTypeProvider;

@@ -1,21 +1,23 @@
 package com.t13max.ioc.beans;
 
+import com.t13max.ioc.core.convert.ConversionService;
+
 /**
  * @Author: t13max
  * @Since: 22:29 2026/1/16
  */
 public interface ConfigurablePropertyAccessor extends PropertyAccessor, PropertyEditorRegistry, TypeConverter {
-    
-    void setConversionService( ConversionService conversionService);
-    
-     ConversionService getConversionService();
-    
+
+    void setConversionService(ConversionService conversionService);
+
+    ConversionService getConversionService();
+
     void setExtractOldValueForEditor(boolean extractOldValueForEditor);
-    
+
     boolean isExtractOldValueForEditor();
-    
+
     void setAutoGrowNestedPaths(boolean autoGrowNestedPaths);
-    
+
     boolean isAutoGrowNestedPaths();
 
 }

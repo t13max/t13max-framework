@@ -1,8 +1,8 @@
 package com.t13max.ioc.core;
 
-import com.t13max.ioc.utils.ConcurrentReferenceHashMap;
-import com.t13max.ioc.utils.ObjectUtils;
-import com.t13max.ioc.utils.ReflectionUtils;
+import com.t13max.ioc.util.ConcurrentReferenceHashMap;
+import com.t13max.ioc.util.ObjectUtils;
+import com.t13max.ioc.util.ReflectionUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

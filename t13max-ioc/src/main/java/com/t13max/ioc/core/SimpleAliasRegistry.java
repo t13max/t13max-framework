@@ -1,9 +1,9 @@
 package com.t13max.ioc.core;
 
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ObjectUtils;
-import com.t13max.ioc.utils.StringUtils;
-import com.t13max.ioc.utils.StringValueResolver;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ObjectUtils;
+import com.t13max.ioc.util.StringUtils;
+import com.t13max.ioc.util.StringValueResolver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

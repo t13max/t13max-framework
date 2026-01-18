@@ -6,7 +6,7 @@ import com.t13max.ioc.beans.factory.config.BeanPostProcessor;
 import com.t13max.ioc.context.ConfigurableApplicationContext;
 import com.t13max.ioc.context.EmbeddedValueResolverAware;
 import com.t13max.ioc.context.ResourceLoaderAware;
-import com.t13max.ioc.utils.StringValueResolver;
+import com.t13max.ioc.util.StringValueResolver;
 
 /**
  * @Author: t13max

@@ -1,7 +1,7 @@
 package com.t13max.ioc.beans.factory.support;
 
 import com.t13max.ioc.beans.factory.config.BeanDefinition;
-import com.t13max.ioc.utils.ObjectUtils;
+import com.t13max.ioc.util.ObjectUtils;
 
 /**
  * @Author: t13max

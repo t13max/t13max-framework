@@ -1,9 +1,8 @@
 package com.t13max.ioc.beans;
 
 import com.t13max.ioc.core.*;
-import com.t13max.ioc.utils.*;
+import com.t13max.ioc.util.*;
 
-import java.beans.ConstructorProperties;
 import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.lang.reflect.*;

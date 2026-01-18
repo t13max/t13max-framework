@@ -1,8 +1,8 @@
 package com.t13max.ioc.core;
 
-import com.t13max.ioc.utils.ClassUtils;
-import com.t13max.ioc.utils.ConcurrentReferenceHashMap;
-import com.t13max.ioc.utils.ReflectionUtils;
+import com.t13max.ioc.util.ClassUtils;
+import com.t13max.ioc.util.ConcurrentReferenceHashMap;
+import com.t13max.ioc.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -16,19 +16,13 @@ import java.util.Map;
  * @Since: 22:16 2026/1/16
  */
 public final class BridgeMethodResolver {
-
 	private static final Map<Object, Method> cache = new ConcurrentReferenceHashMap<>();
-
 	private BridgeMethodResolver() {
 	}
-
-
 	
 	public static Method findBridgedMethod(Method bridgeMethod) {
 		return resolveBridgeMethod(bridgeMethod, bridgeMethod.getDeclaringClass());
-	}
-
-	
+	}	
 	public static Method getMostSpecificMethod(Method bridgeMethod,  Class<?> targetClass) {
 		if (targetClass != null &&
 				!ClassUtils.getUserClass(bridgeMethod.getDeclaringClass()).isAssignableFrom(targetClass) &&
@@ -36,12 +30,10 @@ public final class BridgeMethodResolver {
 			// From a different class hierarchy, and not a JDK or CGLIB proxy either -> return as-is.
 			return bridgeMethod;
 		}
-
 		Method specificMethod = ClassUtils.getMostSpecificMethod(bridgeMethod, targetClass);
 		return resolveBridgeMethod(specificMethod,
 				(targetClass != null ? targetClass : specificMethod.getDeclaringClass()));
 	}
-
 	private static Method resolveBridgeMethod(Method bridgeMethod, Class<?> targetClass) {
 		boolean localBridge = (targetClass == bridgeMethod.getDeclaringClass());
 		Class<?> userClass = targetClass;
@@ -51,7 +43,6 @@ public final class BridgeMethodResolver {
 				return bridgeMethod;
 			}
 		}
-
 		Object cacheKey = (localBridge ? bridgeMethod : new MethodClassKey(bridgeMethod, targetClass));
 		Method bridgedMethod = cache.get(cacheKey);
 		if (bridgedMethod == null) {
@@ -71,16 +62,12 @@ public final class BridgeMethodResolver {
 			cache.put(cacheKey, bridgedMethod);
 		}
 		return bridgedMethod;
-	}
-
-	
+	}	
 	private static boolean isBridgedCandidateFor(Method candidateMethod, Method bridgeMethod) {
 		return (!candidateMethod.isBridge() &&
 				candidateMethod.getName().equals(bridgeMethod.getName()) &&
 				candidateMethod.getParameterCount() == bridgeMethod.getParameterCount());
-	}
-
-	
+	}	
 	private static  Method searchCandidates(List<Method> candidateMethods, Method bridgeMethod) {
 		if (candidateMethods.isEmpty()) {
 			return null;
@@ -98,18 +85,14 @@ public final class BridgeMethodResolver {
 			previousMethod = candidateMethod;
 		}
 		return (sameSig ? candidateMethods.get(0) : null);
-	}
-
-	
+	}	
 	static boolean isBridgeMethodFor(Method bridgeMethod, Method candidateMethod, Class<?> declaringClass) {
 		if (isResolvedTypeMatch(candidateMethod, bridgeMethod, declaringClass)) {
 			return true;
 		}
 		Method method = findGenericDeclaration(bridgeMethod);
 		return (method != null && isResolvedTypeMatch(method, candidateMethod, declaringClass));
-	}
-
-	
+	}	
 	private static boolean isResolvedTypeMatch(Method genericMethod, Method candidateMethod, Class<?> declaringClass) {
 		Type[] genericParameters = genericMethod.getGenericParameterTypes();
 		if (genericParameters.length != candidateMethod.getParameterCount()) {
@@ -132,14 +115,11 @@ public final class BridgeMethodResolver {
 			}
 		}
 		return true;
-	}
-
-	
+	}	
 	private static  Method findGenericDeclaration(Method bridgeMethod) {
 		if (!bridgeMethod.isBridge()) {
 			return bridgeMethod;
 		}
-
 		// Search parent types for method that has same signature as bridge.
 		Class<?> superclass = bridgeMethod.getDeclaringClass().getSuperclass();
 		while (superclass != null && Object.class != superclass) {
@@ -149,11 +129,9 @@ public final class BridgeMethodResolver {
 			}
 			superclass = superclass.getSuperclass();
 		}
-
 		Class<?>[] interfaces = ClassUtils.getAllInterfacesForClass(bridgeMethod.getDeclaringClass());
 		return searchInterfaces(interfaces, bridgeMethod);
 	}
-
 	private static  Method searchInterfaces(Class<?>[] interfaces, Method bridgeMethod) {
 		for (Class<?> ifc : interfaces) {
 			Method method = searchForMatch(ifc, bridgeMethod);
@@ -168,9 +146,7 @@ public final class BridgeMethodResolver {
 			}
 		}
 		return null;
-	}
-
-	
+	}	
 	private static  Method searchForMatch(Class<?> type, Method bridgeMethod) {
 		try {
 			return type.getDeclaredMethod(bridgeMethod.getName(), bridgeMethod.getParameterTypes());
@@ -178,9 +154,7 @@ public final class BridgeMethodResolver {
 		catch (NoSuchMethodException ex) {
 			return null;
 		}
-	}
-
-	
+	}	
 	public static boolean isVisibilityBridgeMethodPair(Method bridgeMethod, Method bridgedMethod) {
 		if (bridgeMethod == bridgedMethod) {
 			// Same method: for common purposes, return true to proceed as if it was a visibility bridge.

@@ -4,7 +4,7 @@ import com.t13max.ioc.aop.AfterAdvice;
 import com.t13max.ioc.aop.AfterReturningAdvice;
 import com.t13max.ioc.aop.intecept.MethodInterceptor;
 import com.t13max.ioc.aop.intecept.MethodInvocation;
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 
 import java.io.Serializable;
 

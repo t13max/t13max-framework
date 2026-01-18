@@ -1,16 +1,18 @@
 package com.t13max.ioc.context.annotation;
 
+import com.t13max.ioc.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import com.t13max.ioc.beans.factory.config.BeanDefinitionCustomizer;
 import com.t13max.ioc.beans.factory.config.BeanDefinitionHolder;
+import com.t13max.ioc.beans.factory.support.AutowireCandidateQualifier;
 import com.t13max.ioc.beans.factory.support.BeanDefinitionReaderUtils;
 import com.t13max.ioc.beans.factory.support.BeanDefinitionRegistry;
+import com.t13max.ioc.beans.factory.support.BeanNameGenerator;
 import com.t13max.ioc.core.env.Environment;
 import com.t13max.ioc.core.env.EnvironmentCapable;
 import com.t13max.ioc.core.env.StandardEnvironment;
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 import org.apache.logging.log4j.util.Lazy;
 
-import java.awt.*;
 import java.lang.annotation.Annotation;
 import java.util.function.Supplier;
 
@@ -31,6 +33,7 @@ public class AnnotatedBeanDefinitionReader {
     public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry) {
         this(registry, getOrCreateEnvironment(registry));
     }
+
     public AnnotatedBeanDefinitionReader(BeanDefinitionRegistry registry, Environment environment) {
         Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
         Assert.notNull(environment, "Environment must not be null");
@@ -42,14 +45,17 @@ public class AnnotatedBeanDefinitionReader {
     public final BeanDefinitionRegistry getRegistry() {
         return this.registry;
     }
+
     public void setEnvironment(Environment environment) {
         this.conditionEvaluator = new ConditionEvaluator(this.registry, environment, null);
     }
-    public void setBeanNameGenerator( BeanNameGenerator beanNameGenerator) {
+
+    public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
         this.beanNameGenerator =
                 (beanNameGenerator != null ? beanNameGenerator : AnnotationBeanNameGenerator.INSTANCE);
     }
-    public void setScopeMetadataResolver( ScopeMetadataResolver scopeMetadataResolver) {
+
+    public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
         this.scopeMetadataResolver =
                 (scopeMetadataResolver != null ? scopeMetadataResolver : new AnnotationScopeMetadataResolver());
     }
@@ -59,36 +65,44 @@ public class AnnotatedBeanDefinitionReader {
             registerBean(componentClass);
         }
     }
+
     public void registerBean(Class<?> beanClass) {
         doRegisterBean(beanClass, null, null, null, null);
     }
-    public void registerBean(Class<?> beanClass,  String name) {
+
+    public void registerBean(Class<?> beanClass, String name) {
         doRegisterBean(beanClass, name, null, null, null);
     }
+
     @SuppressWarnings("unchecked")
     public void registerBean(Class<?> beanClass, Class<? extends Annotation>... qualifiers) {
         doRegisterBean(beanClass, null, qualifiers, null, null);
     }
+
     @SuppressWarnings("unchecked")
-    public void registerBean(Class<?> beanClass,  String name,
+    public void registerBean(Class<?> beanClass, String name,
                              Class<? extends Annotation>... qualifiers) {
 
         doRegisterBean(beanClass, name, qualifiers, null, null);
     }
-    public <T> void registerBean(Class<T> beanClass,  Supplier<T> supplier) {
+
+    public <T> void registerBean(Class<T> beanClass, Supplier<T> supplier) {
         doRegisterBean(beanClass, null, null, supplier, null);
     }
-    public <T> void registerBean(Class<T> beanClass,  String name,  Supplier<T> supplier) {
+
+    public <T> void registerBean(Class<T> beanClass, String name, Supplier<T> supplier) {
         doRegisterBean(beanClass, name, null, supplier, null);
     }
-    public <T> void registerBean(Class<T> beanClass,  String name,  Supplier<T> supplier,
+
+    public <T> void registerBean(Class<T> beanClass, String name, Supplier<T> supplier,
                                  BeanDefinitionCustomizer... customizers) {
 
         doRegisterBean(beanClass, name, null, supplier, customizers);
     }
-    private <T> void doRegisterBean(Class<T> beanClass,  String name,
-                                    Class<? extends Annotation>  [] qualifiers,  Supplier<T> supplier,
-                                    BeanDefinitionCustomizer  [] customizers) {
+
+    private <T> void doRegisterBean(Class<T> beanClass, String name,
+                                    Class<? extends Annotation>[] qualifiers, Supplier<T> supplier,
+                                    BeanDefinitionCustomizer[] customizers) {
 
         AnnotatedGenericBeanDefinition abd = new AnnotatedGenericBeanDefinition(beanClass);
         if (this.conditionEvaluator.shouldSkip(abd.getMetadata())) {

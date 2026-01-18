@@ -1,6 +1,8 @@
 package com.t13max.ioc.beans.factory.config;
 
+import com.t13max.ioc.beans.BeanMetadataElement;
 import com.t13max.ioc.beans.MutablePropertyValues;
+import com.t13max.ioc.core.AttributeAccessor;
 import com.t13max.ioc.core.ResolvableType;
 
 /**
@@ -9,7 +11,7 @@ import com.t13max.ioc.core.ResolvableType;
  * @Author: t13max
  * @Since: 21:41 2026/1/14
  */
-public interface BeanDefinition {
+public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
     String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
 

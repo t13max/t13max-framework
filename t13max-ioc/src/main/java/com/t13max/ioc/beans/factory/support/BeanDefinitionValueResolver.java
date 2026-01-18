@@ -1,15 +1,15 @@
 package com.t13max.ioc.beans.factory.support;
 
+import com.t13max.ioc.beans.BeanWrapper;
 import com.t13max.ioc.beans.BeanWrapperImpl;
 import com.t13max.ioc.beans.BeansException;
+import com.t13max.ioc.beans.TypeConverter;
 import com.t13max.ioc.beans.factory.*;
-import com.t13max.ioc.beans.factory.config.BeanDefinition;
-import com.t13max.ioc.beans.factory.config.BeanDefinitionHolder;
-import com.t13max.ioc.beans.factory.config.DependencyDescriptor;
-import com.t13max.ioc.utils.ClassUtils;
-import com.t13max.ioc.utils.CollectionUtils;
-import com.t13max.ioc.utils.ObjectUtils;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.beans.factory.config.*;
+import com.t13max.ioc.util.ClassUtils;
+import com.t13max.ioc.util.CollectionUtils;
+import com.t13max.ioc.util.ObjectUtils;
+import com.t13max.ioc.util.StringUtils;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -29,16 +29,14 @@ public class BeanDefinitionValueResolver {
 
     private final TypeConverter typeConverter;
     
-    public BeanDefinitionValueResolver(AbstractAutowireCapableBeanFactory beanFactory, String beanName,
-                                       BeanDefinition beanDefinition, TypeConverter typeConverter) {
+    public BeanDefinitionValueResolver(AbstractAutowireCapableBeanFactory beanFactory, String beanName, BeanDefinition beanDefinition, TypeConverter typeConverter) {
 
         this.beanFactory = beanFactory;
         this.beanName = beanName;
         this.beanDefinition = beanDefinition;
         this.typeConverter = typeConverter;
     }    
-    public BeanDefinitionValueResolver(AbstractAutowireCapableBeanFactory beanFactory, String beanName,
-                                       BeanDefinition beanDefinition) {
+    public BeanDefinitionValueResolver(AbstractAutowireCapableBeanFactory beanFactory, String beanName, BeanDefinition beanDefinition) {
 
         this.beanFactory = beanFactory;
         this.beanName = beanName;

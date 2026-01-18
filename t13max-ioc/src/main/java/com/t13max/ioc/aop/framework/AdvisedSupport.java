@@ -5,10 +5,10 @@ import com.t13max.ioc.aop.support.DefaultIntroductionAdvisor;
 import com.t13max.ioc.aop.support.DefaultPointcutAdvisor;
 import com.t13max.ioc.aop.target.EmptyTargetSource;
 import com.t13max.ioc.aop.target.SingletonTargetSource;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ClassUtils;
-import com.t13max.ioc.utils.CollectionUtils;
-import com.t13max.ioc.utils.ObjectUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ClassUtils;
+import com.t13max.ioc.util.CollectionUtils;
+import com.t13max.ioc.util.ObjectUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

@@ -1,6 +1,6 @@
 package com.t13max.ioc.beans;
 
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.*;

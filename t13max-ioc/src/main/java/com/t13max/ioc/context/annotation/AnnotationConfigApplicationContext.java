@@ -1,10 +1,12 @@
 package com.t13max.ioc.context.annotation;
 
+import com.t13max.ioc.beans.factory.config.BeanDefinitionCustomizer;
+import com.t13max.ioc.beans.factory.support.BeanNameGenerator;
 import com.t13max.ioc.beans.factory.support.DefaultListableBeanFactory;
 import com.t13max.ioc.context.support.GenericApplicationContext;
 import com.t13max.ioc.core.env.ConfigurableEnvironment;
 import com.t13max.ioc.core.metrics.StartupStep;
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -15,7 +17,7 @@ import java.util.function.Supplier;
  * @Author: t13max
  * @Since: 22:26 2026/1/14
  */
-public class AnnotationConfigApplicationContext extends GenericApplicationContext {
+public class AnnotationConfigApplicationContext extends GenericApplicationContext implements AnnotationConfigRegistry {
 
     private final AnnotatedBeanDefinitionReader reader;
 
@@ -27,7 +29,6 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
         createAnnotatedBeanDefReader.end();
         this.scanner = new ClassPathBeanDefinitionScanner(this);
     }
-
 
     public AnnotationConfigApplicationContext(DefaultListableBeanFactory beanFactory) {
         super(beanFactory);
@@ -57,8 +58,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
     public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
         this.reader.setBeanNameGenerator(beanNameGenerator);
         this.scanner.setBeanNameGenerator(beanNameGenerator);
-        getBeanFactory().registerSingleton(
-                AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
+        getBeanFactory().registerSingleton(AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR, beanNameGenerator);
     }
 
     public void setScopeMetadataResolver(ScopeMetadataResolver scopeMetadataResolver) {
@@ -67,7 +67,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
     }
 
     //---------------------------------------------------------------------
-    // Implementation of AnnotationConfigRegistry
+    // AnnotationConfigRegistry实现
     //---------------------------------------------------------------------
 
     @Override
@@ -89,7 +89,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
     }
 
     //---------------------------------------------------------------------
-    // Adapt superclass registerBean calls to AnnotatedBeanDefinitionReader
+    // 重写, 适配为AnnotatedBeanDefinitionReader
     //---------------------------------------------------------------------
 
     @Override

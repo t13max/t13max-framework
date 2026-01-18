@@ -6,9 +6,8 @@ import com.t13max.ioc.aop.TargetSource;
 import com.t13max.ioc.aop.intecept.MethodInvocation;
 import com.t13max.ioc.aop.support.AopUtils;
 import com.t13max.ioc.core.DecoratingProxy;
-import com.t13max.ioc.core.KotlinDetector;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ClassUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ClassUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

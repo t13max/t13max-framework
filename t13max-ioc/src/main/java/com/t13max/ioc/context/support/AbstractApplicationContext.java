@@ -9,11 +9,11 @@ import com.t13max.ioc.beans.factory.config.ConfigurableListableBeanFactory;
 import com.t13max.ioc.beans.support.ResourceEditorRegistrar;
 import com.t13max.ioc.context.*;
 import com.t13max.ioc.context.event.*;
-import com.t13max.ioc.context.expression.StandardBeanExpressionResolver;
 import com.t13max.ioc.context.weaving.LoadTimeWeaverAware;
 import com.t13max.ioc.context.weaving.LoadTimeWeaverAwareProcessor;
 import com.t13max.ioc.core.NativeDetector;
 import com.t13max.ioc.core.ResolvableType;
+import com.t13max.ioc.core.convert.ConversionService;
 import com.t13max.ioc.core.env.ConfigurableEnvironment;
 import com.t13max.ioc.core.env.Environment;
 import com.t13max.ioc.core.env.StandardEnvironment;
@@ -24,7 +24,7 @@ import com.t13max.ioc.core.io.support.PathMatchingResourcePatternResolver;
 import com.t13max.ioc.core.io.support.ResourcePatternResolver;
 import com.t13max.ioc.core.metrics.ApplicationStartup;
 import com.t13max.ioc.core.metrics.StartupStep;
-import com.t13max.ioc.utils.*;
+import com.t13max.ioc.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -43,6 +43,18 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Since: 22:49 2026/1/14
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader implements ConfigurableApplicationContext {
+
+    public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
+
+    public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
+
+    public static final String LIFECYCLE_PROCESSOR_BEAN_NAME = "lifecycleProcessor";
+
+    static {
+        // Eagerly load the ContextClosedEvent class to avoid weird classloader issues
+        // on application shutdown in WebLogic 8.1. (Reported by Dustin Woods.)
+        ContextClosedEvent.class.getName();
+    }
 
     protected final Logger logger = LogManager.getLogger(getClass());
 
@@ -162,14 +174,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
     @Override
     public void publishEvent(ApplicationEvent event) {
-        //publishEvent(event, null);
+        publishEvent(event, null);
     }
 
     @Override
     public void publishEvent(Object event) {
-        //publishEvent(event, null);
+        publishEvent(event, null);
     }    
-    /*protected void publishEvent(Object event, ResolvableType typeHint) {
+    protected void publishEvent(Object event, ResolvableType typeHint) {
         Assert.notNull(event, "Event must not be null");
         ResolvableType eventType = null;
 
@@ -215,7 +227,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
                 this.parent.publishEvent(event);
             }
         }
-    }*/
+    }
+
+    ApplicationEventMulticaster getApplicationEventMulticaster() throws IllegalStateException {
+        if (this.applicationEventMulticaster == null) {
+            throw new IllegalStateException("ApplicationEventMulticaster not initialized - call 'refresh' before multicasting events via the context: " + this);
+        }
+        return this.applicationEventMulticaster;
+    }
 
     @Override
     public void setApplicationStartup(ApplicationStartup applicationStartup) {
@@ -281,6 +300,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
             this.applicationEventMulticaster.removeApplicationListener(listener);
         }
         this.applicationListeners.remove(listener);
+    }
+
+    public Collection<ApplicationListener<?>> getApplicationListeners() {
+        return this.applicationListeners;
     }
 
     /**
@@ -408,7 +431,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
         // Tell the internal bean factory to use the context's class loader etc.
         beanFactory.setBeanClassLoader(getClassLoader());
-        beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+        //beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
         beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
         // Configure the bean factory with context callbacks.

@@ -4,8 +4,8 @@ import com.t13max.ioc.beans.*;
 import com.t13max.ioc.beans.factory.*;
 import com.t13max.ioc.beans.factory.config.*;
 import com.t13max.ioc.core.*;
-import com.t13max.ioc.utils.*;
-import com.t13max.ioc.utils.function.ThrowingSupplier;
+import com.t13max.ioc.util.*;
+import com.t13max.ioc.util.function.ThrowingSupplier;
 
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
@@ -1051,7 +1051,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
 
         if (pvs != null) {
-            //**对属性进行依赖注入
+            //对属性进行依赖注入
             applyPropertyValues(beanName, mbd, bw, pvs);
         }
     }
@@ -1273,10 +1273,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
     }
 
-    /**
-     * 1. isWritableProperty: 属性可写
-     * 2. isNestedOrIndexedProperty: 是否循环嵌套
-     */
+    
     private boolean isConvertibleProperty(String propertyName, BeanWrapper bw) {
         try {
             return !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName) &&
@@ -1471,7 +1468,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     }
 
 
-    private static class FactoryBeanMethodTypeFinder implements MethodCallback {
+    private static class FactoryBeanMethodTypeFinder implements ReflectionUtils.MethodCallback {
 
         private final String factoryMethodName;
 

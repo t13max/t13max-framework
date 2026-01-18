@@ -6,11 +6,12 @@ import com.t13max.ioc.beans.factory.config.AutowireCapableBeanFactory;
 import com.t13max.ioc.beans.factory.config.BeanDefinition;
 import com.t13max.ioc.beans.factory.config.ConstructorArgumentValues;
 import com.t13max.ioc.core.ResolvableType;
+import com.t13max.ioc.core.io.DescriptiveResource;
 import com.t13max.ioc.core.io.Resource;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ClassUtils;
-import com.t13max.ioc.utils.ObjectUtils;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ClassUtils;
+import com.t13max.ioc.util.ObjectUtils;
+import com.t13max.ioc.util.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
@@ -48,7 +49,6 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     public static final String ORDER_ATTRIBUTE = "order";
 
     public static final String INFER_METHOD = "(inferred)";
-
 
     private volatile Object beanClass;
 
@@ -653,9 +653,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 
     public void validate() throws BeanDefinitionValidationException {
         if (hasMethodOverrides() && getFactoryMethodName() != null) {
-            throw new BeanDefinitionValidationException(
-                    "Cannot combine factory method with container-generated method overrides: " +
-                            "the factory method must create the concrete bean instance.");
+            throw new BeanDefinitionValidationException("Cannot combine factory method with container-generated method overrides: the factory method must create the concrete bean instance.");
         }
         if (hasBeanClass()) {
             prepareMethodOverrides();
@@ -672,9 +670,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
     protected void prepareMethodOverride(MethodOverride mo) throws BeanDefinitionValidationException {
         int count = ClassUtils.getMethodCountForName(getBeanClass(), mo.getMethodName());
         if (count == 0) {
-            throw new BeanDefinitionValidationException(
-                    "Invalid method override: no method with name '" + mo.getMethodName() +
-                            "' on class [" + getBeanClassName() + "]");
+            throw new BeanDefinitionValidationException("Invalid method override: no method with name '" + mo.getMethodName() + "' on class [" + getBeanClassName() + "]");
         } else if (count == 1) {
             // Mark override as not overloaded, to avoid the overhead of arg type checking.
             mo.setOverloaded(false);

@@ -2,8 +2,8 @@ package com.t13max.ioc.beans.factory;
 
 import com.t13max.ioc.beans.BeansException;
 import com.t13max.ioc.core.ResolvableType;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.*;

@@ -1,6 +1,6 @@
 package com.t13max.ioc.beans.factory.config;
 
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 
 /**
  * @author t13max

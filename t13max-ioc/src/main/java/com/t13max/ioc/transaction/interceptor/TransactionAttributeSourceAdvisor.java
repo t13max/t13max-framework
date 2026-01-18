@@ -3,7 +3,7 @@ package com.t13max.ioc.transaction.interceptor;
 import com.t13max.ioc.aop.Advice;
 import com.t13max.ioc.aop.Pointcut;
 import com.t13max.ioc.aop.support.AbstractPointcutAdvisor;
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 
 /**
  * @author t13max

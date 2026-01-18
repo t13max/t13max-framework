@@ -1,9 +1,13 @@
 package com.t13max.ioc.context.annotation;
 
 import com.t13max.ioc.beans.factory.BeanDefinitionStoreException;
+import com.t13max.ioc.beans.factory.annotation.AnnotatedBeanDefinition;
 import com.t13max.ioc.beans.factory.config.BeanDefinition;
 import com.t13max.ioc.beans.factory.support.BeanDefinitionRegistry;
 import com.t13max.ioc.context.ResourceLoaderAware;
+import com.t13max.ioc.context.index.CandidateComponentsIndex;
+import com.t13max.ioc.context.index.CandidateComponentsIndexLoader;
+import com.t13max.ioc.core.SpringProperties;
 import com.t13max.ioc.core.env.Environment;
 import com.t13max.ioc.core.env.EnvironmentCapable;
 import com.t13max.ioc.core.env.StandardEnvironment;
@@ -11,10 +15,21 @@ import com.t13max.ioc.core.io.Resource;
 import com.t13max.ioc.core.io.ResourceLoader;
 import com.t13max.ioc.core.io.support.PathMatchingResourcePatternResolver;
 import com.t13max.ioc.core.io.support.ResourcePatternResolver;
+import com.t13max.ioc.core.io.support.ResourcePatternUtils;
+import com.t13max.ioc.core.type.AnnotationMetadata;
+import com.t13max.ioc.core.type.classreading.CachingMetadataReaderFactory;
+import com.t13max.ioc.core.type.classreading.ClassFormatException;
+import com.t13max.ioc.core.type.classreading.MetadataReader;
+import com.t13max.ioc.core.type.classreading.MetadataReaderFactory;
+import com.t13max.ioc.core.type.filter.AnnotationTypeFilter;
+import com.t13max.ioc.core.type.filter.AssignableTypeFilter;
+import com.t13max.ioc.core.type.filter.TypeFilter;
 import com.t13max.ioc.stereotype.Indexed;
-import com.t13max.ioc.utils.AnnotationUtils;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ClassUtils;
+import com.t13max.ioc.util.AnnotationUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ClassUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.io.FileNotFoundException;
@@ -43,21 +58,23 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
     private final List<TypeFilter> excludeFilters = new ArrayList<>();
 
-    private  Environment environment;
+    private Environment environment;
 
-    private  ConditionEvaluator conditionEvaluator;
+    private ConditionEvaluator conditionEvaluator;
 
-    private  ResourcePatternResolver resourcePatternResolver;
+    private ResourcePatternResolver resourcePatternResolver;
 
-    private  MetadataReaderFactory metadataReaderFactory;
+    private MetadataReaderFactory metadataReaderFactory;
 
-    private  CandidateComponentsIndex componentsIndex;
+    private CandidateComponentsIndex componentsIndex;
 
     protected ClassPathScanningCandidateComponentProvider() {
     }
+
     public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters) {
         this(useDefaultFilters, new StandardEnvironment());
     }
+
     public ClassPathScanningCandidateComponentProvider(boolean useDefaultFilters, Environment environment) {
         if (useDefaultFilters) {
             registerDefaultFilters();
@@ -70,12 +87,15 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
         Assert.notNull(resourcePattern, "'resourcePattern' must not be null");
         this.resourcePattern = resourcePattern;
     }
+
     public void addIncludeFilter(TypeFilter includeFilter) {
         this.includeFilters.add(includeFilter);
     }
+
     public void addExcludeFilter(TypeFilter excludeFilter) {
         this.excludeFilters.add(0, excludeFilter);
     }
+
     public void resetFilters(boolean useDefaultFilters) {
         this.includeFilters.clear();
         this.excludeFilters.clear();
@@ -83,19 +103,19 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
             registerDefaultFilters();
         }
     }
+
     @SuppressWarnings("unchecked")
     protected void registerDefaultFilters() {
         this.includeFilters.add(new AnnotationTypeFilter(Component.class));
         ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
         try {
-            this.includeFilters.add(new AnnotationTypeFilter(
-                    ((Class<? extends Annotation>) ClassUtils.forName("jakarta.inject.Named", cl)), false));
+            this.includeFilters.add(new AnnotationTypeFilter(((Class<? extends Annotation>) ClassUtils.forName("jakarta.inject.Named", cl)), false));
             logger.trace("JSR-330 'jakarta.inject.Named' annotation found and supported for component scanning");
-        }
-        catch (ClassNotFoundException ex) {
+        } catch (ClassNotFoundException ex) {
             // JSR-330 API (as included in Jakarta EE) not available - simply skip.
         }
     }
+
     public void setEnvironment(Environment environment) {
         Assert.notNull(environment, "Environment must not be null");
         this.environment = environment;
@@ -113,12 +133,14 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
     protected BeanDefinitionRegistry getRegistry() {
         return null;
     }
+
     @Override
-    public void setResourceLoader( ResourceLoader resourceLoader) {
+    public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
         this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
         this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(this.resourcePatternResolver.getClassLoader());
     }
+
     public final ResourceLoader getResourceLoader() {
         return getResourcePatternResolver();
     }
@@ -129,9 +151,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
         }
         return this.resourcePatternResolver;
     }
+
     public void setMetadataReaderFactory(MetadataReaderFactory metadataReaderFactory) {
         this.metadataReaderFactory = metadataReaderFactory;
     }
+
     public final MetadataReaderFactory getMetadataReaderFactory() {
         if (this.metadataReaderFactory == null) {
             this.metadataReaderFactory = new CachingMetadataReaderFactory();
@@ -142,11 +166,11 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
     public Set<BeanDefinition> findCandidateComponents(String basePackage) {
         if (this.componentsIndex != null && indexSupportsIncludeFilters()) {
             return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
-        }
-        else {
+        } else {
             return scanCandidateComponents(basePackage);
         }
     }
+
     private boolean indexSupportsIncludeFilters() {
         for (TypeFilter includeFilter : this.includeFilters) {
             if (!indexSupportsIncludeFilter(includeFilter)) {
@@ -155,6 +179,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
         }
         return true;
     }
+
     private boolean indexSupportsIncludeFilter(TypeFilter filter) {
         if (filter instanceof AnnotationTypeFilter annotationTypeFilter) {
             Class<? extends Annotation> annotationType = annotationTypeFilter.getAnnotationType();
@@ -168,7 +193,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
         }
         return false;
     }
-    private  String extractStereotype(TypeFilter filter) {
+
+    private String extractStereotype(TypeFilter filter) {
         if (filter instanceof AnnotationTypeFilter annotationTypeFilter) {
             return annotationTypeFilter.getAnnotationType().getName();
         }
@@ -201,21 +227,18 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
                             logger.debug("Using candidate component class from index: " + type);
                         }
                         candidates.add(sbd);
-                    }
-                    else {
+                    } else {
                         if (debugEnabled) {
                             logger.debug("Ignored because not a concrete top-level class: " + type);
                         }
                     }
-                }
-                else {
+                } else {
                     if (traceEnabled) {
                         logger.trace("Ignored because matching an exclude filter: " + type);
                     }
                 }
             }
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
         }
         return candidates;
@@ -248,42 +271,35 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
                                 logger.debug("Identified candidate component class: " + resource);
                             }
                             candidates.add(sbd);
-                        }
-                        else {
+                        } else {
                             if (debugEnabled) {
                                 logger.debug("Ignored because not a concrete top-level class: " + resource);
                             }
                         }
-                    }
-                    else {
+                    } else {
                         if (traceEnabled) {
                             logger.trace("Ignored because not matching any filter: " + resource);
                         }
                     }
-                }
-                catch (FileNotFoundException ex) {
+                } catch (FileNotFoundException ex) {
                     if (traceEnabled) {
                         logger.trace("Ignored non-readable " + resource + ": " + ex.getMessage());
                     }
-                }
-                catch (ClassFormatException ex) {
+                } catch (ClassFormatException ex) {
                     if (shouldIgnoreClassFormatException) {
                         if (debugEnabled) {
                             logger.debug("Ignored incompatible class format in " + resource + ": " + ex.getMessage());
                         }
-                    }
-                    else {
+                    } else {
                         throw new BeanDefinitionStoreException("Incompatible class format in " + resource +
                                 ": set system property 'spring.classformat.ignore' to 'true' " +
                                 "if you mean to ignore such files during classpath scanning", ex);
                     }
-                }
-                catch (Throwable ex) {
+                } catch (Throwable ex) {
                     throw new BeanDefinitionStoreException("Failed to read candidate component class: " + resource, ex);
                 }
             }
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new BeanDefinitionStoreException("I/O failure during classpath scanning", ex);
         }
         return candidates;
@@ -292,6 +308,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
     protected String resolveBasePackage(String basePackage) {
         return ClassUtils.convertClassNameToResourcePath(getEnvironment().resolveRequiredPlaceholders(basePackage));
     }
+
     protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
         for (TypeFilter tf : this.excludeFilters) {
             if (tf.match(metadataReader, getMetadataReaderFactory())) {
@@ -305,6 +322,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
         }
         return false;
     }
+
     private boolean isConditionMatch(MetadataReader metadataReader) {
         if (this.conditionEvaluator == null) {
             this.conditionEvaluator =
@@ -312,6 +330,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
         }
         return !this.conditionEvaluator.shouldSkip(metadataReader.getAnnotationMetadata());
     }
+
     protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
         AnnotationMetadata metadata = beanDefinition.getMetadata();
         return (metadata.isIndependent() && (metadata.isConcrete() ||

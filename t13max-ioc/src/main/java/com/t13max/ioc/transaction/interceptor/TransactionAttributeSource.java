@@ -11,8 +11,10 @@ public interface TransactionAttributeSource {
     default boolean isCandidateClass(Class<?> targetClass) {
         return true;
     }
-    default boolean hasTransactionAttribute(Method method,  Class<?> targetClass) {
+
+    default boolean hasTransactionAttribute(Method method, Class<?> targetClass) {
         return (getTransactionAttribute(method, targetClass) != null);
     }
-     TransactionAttribute getTransactionAttribute(Method method,  Class<?> targetClass);
+
+    TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass);
 }

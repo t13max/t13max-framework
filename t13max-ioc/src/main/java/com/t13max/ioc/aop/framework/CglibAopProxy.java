@@ -5,7 +5,7 @@ import com.t13max.ioc.aop.intecept.MethodInterceptor;
 import com.t13max.ioc.aop.intecept.MethodInvocation;
 import com.t13max.ioc.aop.support.AopUtils;
 import com.t13max.ioc.core.SmartClassLoader;
-import com.t13max.ioc.utils.*;
+import com.t13max.ioc.util.*;
 import net.sf.cglib.core.CodeGenerationException;
 import net.sf.cglib.proxy.*;
 import org.apache.logging.log4j.LogManager;

@@ -3,8 +3,8 @@ package com.t13max.ioc.beans.factory.support;
 import com.t13max.ioc.beans.factory.*;
 import com.t13max.ioc.beans.factory.config.SingletonBeanRegistry;
 import com.t13max.ioc.core.SimpleAliasRegistry;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.StringUtils;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

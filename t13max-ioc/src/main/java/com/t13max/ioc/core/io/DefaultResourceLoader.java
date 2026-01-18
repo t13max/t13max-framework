@@ -1,9 +1,9 @@
 package com.t13max.ioc.core.io;
 
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ClassUtils;
-import com.t13max.ioc.utils.ResourceUtils;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ClassUtils;
+import com.t13max.ioc.util.ResourceUtils;
+import com.t13max.ioc.util.StringUtils;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.t13max.ioc.utils.ResourceUtils.CLASSPATH_URL_PREFIX;
+import static com.t13max.ioc.util.ResourceUtils.CLASSPATH_URL_PREFIX;
 
 /**
  * 资源加载器默认实现

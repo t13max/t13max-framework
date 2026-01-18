@@ -4,6 +4,7 @@ import com.t13max.ioc.beans.BeansException;
 import com.t13max.ioc.beans.factory.config.BeanDefinition;
 import com.t13max.ioc.beans.factory.support.AbstractBeanDefinition;
 import com.t13max.ioc.beans.factory.support.RootBeanDefinition;
+import com.t13max.ioc.core.ParameterizedTypeReference;
 import com.t13max.ioc.core.ResolvableType;
 
 import java.util.function.Consumer;

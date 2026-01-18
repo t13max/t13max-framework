@@ -7,7 +7,7 @@ import com.t13max.ioc.beans.factory.BeanClassLoaderAware;
 import com.t13max.ioc.beans.factory.FactoryBean;
 import com.t13max.ioc.beans.factory.FactoryBeanNotInitializedException;
 import com.t13max.ioc.beans.factory.InitializingBean;
-import com.t13max.ioc.utils.ClassUtils;
+import com.t13max.ioc.util.ClassUtils;
 
 /**
  * @author t13max

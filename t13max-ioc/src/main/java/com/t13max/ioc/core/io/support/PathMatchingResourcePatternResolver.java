@@ -1,11 +1,11 @@
 package com.t13max.ioc.core.io.support;
 
-import com.t13max.ioc.core.io.Resource;
-import com.t13max.ioc.core.io.ResourceLoader;
-import com.t13max.ioc.core.io.UrlResource;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ResourceUtils;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.core.NativeDetector;
+import com.t13max.ioc.core.io.*;
+import com.t13max.ioc.util.*;
+import com.t13max.ioc.util.PathMatcher;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,7 +37,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
     private static final Resource[] EMPTY_RESOURCE_ARRAY = {};
 
-    private static final Logger logger = LogManager.getLogger(PathMatchingResourcePatternResolver.class);    
+    private static final Logger logger = LogManager.getLogger(PathMatchingResourcePatternResolver.class);
     private static final Set<String> systemModuleNames = NativeDetector.inNativeImage() ? Collections.emptySet() :
             ModuleFinder.ofSystem().findAll().stream()
                     .map(moduleReference -> moduleReference.descriptor().name())

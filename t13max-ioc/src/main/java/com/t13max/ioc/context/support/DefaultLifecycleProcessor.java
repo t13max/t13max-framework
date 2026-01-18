@@ -6,9 +6,9 @@ import com.t13max.ioc.beans.factory.config.ConfigurableListableBeanFactory;
 import com.t13max.ioc.context.Lifecycle;
 import com.t13max.ioc.context.LifecycleProcessor;
 import com.t13max.ioc.core.SpringProperties;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ClassUtils;
-import com.t13max.ioc.utils.CollectionUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ClassUtils;
+import com.t13max.ioc.util.CollectionUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

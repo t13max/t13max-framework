@@ -1,7 +1,10 @@
 package com.t13max.ioc.context.support;
 
 import com.t13max.ioc.core.DecoratingClassLoader;
-import com.t13max.ioc.utils.ReflectionUtils;
+import com.t13max.ioc.core.OverridingClassLoader;
+import com.t13max.ioc.core.SmartClassLoader;
+import com.t13max.ioc.util.ReflectionUtils;
+import org.apache.logging.log4j.LogManager;
 
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
@@ -19,7 +22,7 @@ public class ContextTypeMatchClassLoader extends DecoratingClassLoader implement
     }
 
 
-    private static final  Method findLoadedClassMethod;
+    private static final Method findLoadedClassMethod;
 
     static {
         // Try to enable findLoadedClass optimization which allows us to selectively
@@ -30,21 +33,19 @@ public class ContextTypeMatchClassLoader extends DecoratingClassLoader implement
         try {
             method = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
             ReflectionUtils.makeAccessible(method);
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             // Typically a JDK 9+ InaccessibleObjectException...
             // Avoid through JVM startup with --add-opens=java.base/java.lang=ALL-UNNAMED
             method = null;
-            LogFactory.getLog(ContextTypeMatchClassLoader.class).debug(
-                    "ClassLoader.findLoadedClass not accessible -> will always override requested class", ex);
+            LogManager.getLogger(ContextTypeMatchClassLoader.class).debug("ClassLoader.findLoadedClass not accessible -> will always override requested class", ex);
         }
         findLoadedClassMethod = method;
     }
-    
+
     private final Map<String, byte[]> bytesCache = new ConcurrentHashMap<>(256);
 
 
-    public ContextTypeMatchClassLoader( ClassLoader parent) {
+    public ContextTypeMatchClassLoader(ClassLoader parent) {
         super(parent);
     }
 
@@ -59,10 +60,10 @@ public class ContextTypeMatchClassLoader extends DecoratingClassLoader implement
     }
 
     @Override
-    public Class<?> publicDefineClass(String name, byte[] b,  ProtectionDomain protectionDomain) {
+    public Class<?> publicDefineClass(String name, byte[] b, ProtectionDomain protectionDomain) {
         return defineClass(name, b, 0, b.length, protectionDomain);
     }
-    
+
     private class ContextOverridingClassLoader extends OverridingClassLoader {
 
         public ContextOverridingClassLoader(ClassLoader parent) {
@@ -87,14 +88,13 @@ public class ContextTypeMatchClassLoader extends DecoratingClassLoader implement
         }
 
         @Override
-        protected  Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+        protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
             byte[] bytes = bytesCache.get(name);
             if (bytes == null) {
                 bytes = loadBytesForClass(name);
                 if (bytes != null) {
                     bytesCache.put(name, bytes);
-                }
-                else {
+                } else {
                     return null;
                 }
             }

@@ -4,7 +4,7 @@ import com.t13max.ioc.aop.AfterAdvice;
 import com.t13max.ioc.aop.framework.AopConfigException;
 import com.t13max.ioc.aop.intecept.MethodInterceptor;
 import com.t13max.ioc.aop.intecept.MethodInvocation;
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,20 +14,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
-
 	private static final String AFTER_THROWING = "afterThrowing";
-
 	private static final Logger logger = LogManager.getLogger(ThrowsAdviceInterceptor.class);
 
-
 	private final Object throwsAdvice;
-
 	private final Map<Class<?>, Method> exceptionHandlerMap = new HashMap<>();
-
 	public ThrowsAdviceInterceptor(Object throwsAdvice) {
 		Assert.notNull(throwsAdvice, "Advice must not be null");
 		this.throwsAdvice = throwsAdvice;
-
 		Method[] methods = throwsAdvice.getClass().getMethods();
 		for (Method method : methods) {
 			if (method.getName().equals(AFTER_THROWING)) {
@@ -65,19 +59,15 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 				}
 			}
 		}
-
 		if (this.exceptionHandlerMap.isEmpty()) {
 			throw new AopConfigException(
 					"At least one handler method must be found in class [" + throwsAdvice.getClass() + "]");
 		}
 	}
-
-
 	
 	public int getHandlerMethodCount() {
 		return this.exceptionHandlerMap.size();
 	}
-
 
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
@@ -91,9 +81,7 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 			}
 			throw ex;
 		}
-	}
-
-	
+	}	
 	private Method getExceptionHandler(Throwable exception) {
 		Class<?> exceptionClass = exception.getClass();
 		if (logger.isTraceEnabled()) {
@@ -109,7 +97,6 @@ public class ThrowsAdviceInterceptor implements MethodInterceptor, AfterAdvice {
 		}
 		return handler;
 	}
-
 	private void invokeHandlerMethod(MethodInvocation mi, Throwable ex, Method method) throws Throwable {
 		Object[] handlerArgs;
 		if (method.getParameterCount() == 1) {

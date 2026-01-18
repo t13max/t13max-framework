@@ -1,6 +1,6 @@
 package com.t13max.ioc.core;
 
-import com.t13max.ioc.utils.ClassUtils;
+import com.t13max.ioc.util.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;

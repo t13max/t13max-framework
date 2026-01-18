@@ -2,6 +2,7 @@ package com.t13max.ioc.context.event;
 
 import com.t13max.ioc.context.ApplicationEvent;
 import com.t13max.ioc.context.ApplicationListener;
+import com.t13max.ioc.core.ResolvableType;
 
 import java.util.function.Predicate;
 
@@ -27,5 +28,5 @@ public interface ApplicationEventMulticaster {
 
     void multicastEvent(ApplicationEvent event);
 
-    //void multicastEvent(ApplicationEvent event, ResolvableType eventType);
+    void multicastEvent(ApplicationEvent event, ResolvableType eventType);
 }

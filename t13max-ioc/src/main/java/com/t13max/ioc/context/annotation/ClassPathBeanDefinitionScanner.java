@@ -1,16 +1,16 @@
 package com.t13max.ioc.context.annotation;
 
+import com.t13max.ioc.beans.factory.annotation.AnnotatedBeanDefinition;
 import com.t13max.ioc.beans.factory.config.BeanDefinition;
 import com.t13max.ioc.beans.factory.config.BeanDefinitionHolder;
-import com.t13max.ioc.beans.factory.support.AbstractBeanDefinition;
-import com.t13max.ioc.beans.factory.support.BeanDefinitionReaderUtils;
-import com.t13max.ioc.beans.factory.support.BeanDefinitionRegistry;
+import com.t13max.ioc.beans.factory.support.*;
 import com.t13max.ioc.core.env.Environment;
 import com.t13max.ioc.core.env.EnvironmentCapable;
 import com.t13max.ioc.core.env.StandardEnvironment;
 import com.t13max.ioc.core.io.ResourceLoader;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ObjectUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ObjectUtils;
+import com.t13max.ioc.util.PatternMatchUtils;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -122,8 +122,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
                 }
                 if (checkCandidate(beanName, candidate)) {
                     BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
-                    definitionHolder =
-                            AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
+                    definitionHolder = AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
                     beanDefinitions.add(definitionHolder);
                     registerBeanDefinition(definitionHolder, this.registry);
                 }

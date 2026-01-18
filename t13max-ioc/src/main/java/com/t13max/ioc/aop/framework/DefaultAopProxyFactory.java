@@ -1,6 +1,6 @@
 package com.t13max.ioc.aop.framework;
 
-import com.t13max.ioc.utils.ClassUtils;
+import com.t13max.ioc.util.ClassUtils;
 
 import java.io.Serializable;
 import java.lang.reflect.Proxy;

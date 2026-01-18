@@ -1,7 +1,9 @@
 package com.t13max.ioc.context.xml;
 
+import com.t13max.ioc.beans.factory.xml.XmlBeanDefinitionReader;
 import com.t13max.ioc.context.support.GenericApplicationContext;
 import com.t13max.ioc.core.env.ConfigurableEnvironment;
+import com.t13max.ioc.core.io.ClassPathResource;
 import com.t13max.ioc.core.io.Resource;
 
 /**

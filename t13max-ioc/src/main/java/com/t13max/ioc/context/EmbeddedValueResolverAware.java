@@ -1,6 +1,6 @@
 package com.t13max.ioc.context;
 
-import com.t13max.ioc.utils.StringValueResolver;
+import com.t13max.ioc.util.StringValueResolver;
 
 /**
  * @Author: t13max

@@ -1,6 +1,6 @@
 package com.t13max.ioc.core.io;
 
-import com.t13max.ioc.utils.ResourceUtils;
+import com.t13max.ioc.util.ResourceUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

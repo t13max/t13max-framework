@@ -7,4 +7,8 @@ package com.t13max.ioc.beans;
 public interface PropertyEditorRegistrar {
 
     void registerCustomEditors(PropertyEditorRegistry registry);
+
+    default boolean overridesDefaultEditors() {
+        return false;
+    }
 }

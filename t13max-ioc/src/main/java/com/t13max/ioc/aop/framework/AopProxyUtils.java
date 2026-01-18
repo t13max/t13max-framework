@@ -6,9 +6,9 @@ import com.t13max.ioc.aop.TargetSource;
 import com.t13max.ioc.aop.support.AopUtils;
 import com.t13max.ioc.aop.target.SingletonTargetSource;
 import com.t13max.ioc.core.DecoratingProxy;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ClassUtils;
-import com.t13max.ioc.utils.ObjectUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ClassUtils;
+import com.t13max.ioc.util.ObjectUtils;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;

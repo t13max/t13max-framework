@@ -1,6 +1,6 @@
 package com.t13max.ioc.aop.framework;
 
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 
 import java.io.Serializable;
 

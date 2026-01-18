@@ -6,7 +6,7 @@ import com.t13max.ioc.beans.factory.BeanFactoryAware;
 import com.t13max.ioc.beans.factory.config.BeanPostProcessor;
 import com.t13max.ioc.context.ConfigurableApplicationContext;
 import com.t13max.ioc.instrument.classloading.LoadTimeWeaver;
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 
 /**
  * @Author: t13max
