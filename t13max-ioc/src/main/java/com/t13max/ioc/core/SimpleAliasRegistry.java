@@ -4,8 +4,8 @@ import com.t13max.ioc.utils.Assert;
 import com.t13max.ioc.utils.ObjectUtils;
 import com.t13max.ioc.utils.StringUtils;
 import com.t13max.ioc.utils.StringValueResolver;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SimpleAliasRegistry implements AliasRegistry {
 
-    protected final Logger logger = LogManager.getLogger(getClass());
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     //别名集合
     private final Map<String, String> aliasMap = new ConcurrentHashMap<>(16);
