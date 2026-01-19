@@ -111,5 +111,5 @@ public abstract class AbstractPropertyAccessor extends TypeConverterSupport impl
     public abstract Object getPropertyValue(String propertyName) throws BeansException;
 
     @Override
-    public abstract void setPropertyValue(String propertyName, @Nullable Object value) throws BeansException;
+    public abstract void setPropertyValue(String propertyName,  Object value) throws BeansException;
 }

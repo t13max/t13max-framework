@@ -1,12 +1,11 @@
 package com.t13max.ioc.beans.factory.support;
 
-import com.t13max.ioc.beans.BeansException;
-import com.t13max.ioc.beans.factory.BeanCreationException;
-import com.t13max.ioc.beans.factory.BeanFactory;
-import com.t13max.ioc.beans.factory.FactoryBean;
+import com.t13max.ioc.beans.*;
+import com.t13max.ioc.beans.factory.*;
 import com.t13max.ioc.beans.factory.config.*;
-import com.t13max.ioc.core.ResolvableType;
-import com.t13max.ioc.utils.*;
+import com.t13max.ioc.core.*;
+import com.t13max.ioc.util.*;
+import com.t13max.ioc.util.function.ThrowingSupplier;
 
 import java.beans.MethodDescriptor;
 import java.beans.PropertyDescriptor;
@@ -23,8 +22,7 @@ import java.util.function.Supplier;
  * @Author: t13max
  * @Since: 22:42 2026/1/15
  */
-public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
-
+public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
     private InstantiationStrategy instantiationStrategy;
 
@@ -44,9 +42,7 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
 
     private final ConcurrentMap<Class<?>, Method[]> factoryMethodCandidateCache = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<Class<?>, PropertyDescriptor[]> filteredPropertyDescriptorsCache =
-            new ConcurrentHashMap<>();
-
+    private final ConcurrentMap<Class<?>, PropertyDescriptor[]> filteredPropertyDescriptorsCache = new ConcurrentHashMap<>();
 
     public AbstractAutowireCapableBeanFactory() {
         super();
@@ -60,7 +56,6 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
         this();
         setParentBeanFactory(parentBeanFactory);
     }
-
 
     public void setInstantiationStrategy(InstantiationStrategy instantiationStrategy) {
         this.instantiationStrategy = instantiationStrategy;
@@ -113,7 +108,6 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
         }
     }
 
-
     //-------------------------------------------------------------------------
     // Typical methods for creating and populating external bean instances
     //-------------------------------------------------------------------------
@@ -159,7 +153,6 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
         populateBean(beanName, bd, bw);
         return initializeBean(beanName, existingBean, bd);
     }
-
 
     //-------------------------------------------------------------------------
     // Specialized methods for fine-grained control over the bean lifecycle
@@ -220,8 +213,7 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
 
     @Deprecated(since = "6.1")
     @Override
-    public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName)
-            throws BeansException {
+    public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) throws BeansException {
 
         Object result = existingBean;
         for (BeanPostProcessor processor : getBeanPostProcessors()) {
@@ -254,7 +246,6 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
         new DisposableBeanAdapter(existingBean, getBeanPostProcessorCache().destructionAware).destroy();
     }
 
-
     //-------------------------------------------------------------------------
     // Delegate methods for resolving injection points
     //-------------------------------------------------------------------------
@@ -273,7 +264,6 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
     public Object resolveDependency(DependencyDescriptor descriptor, String requestingBeanName) throws BeansException {
         return resolveDependency(descriptor, requestingBeanName, null, null);
     }
-
 
     //---------------------------------------------------------------------
     // AbstractBeanFactory的模板方法实现
@@ -336,7 +326,7 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
             instanceWrapper = this.factoryBeanInstanceCache.remove(beanName);
         }
         if (instanceWrapper == null) {
-            //**创建实例对象**
+            //*创建实例对象*
             instanceWrapper = createBeanInstance(beanName, mbd, args);
         }
         //获取实例化对象和其类型
@@ -372,7 +362,7 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
 
         Object exposedObject = bean;
         try {
-            //**把生成的bean对象的依赖关系设置好,完成整个依赖注入过程
+            // 把生成的bean对象的依赖关系设置好,完成整个依赖注入过程
             populateBean(beanName, mbd, instanceWrapper);
             //初始化bean对象
             exposedObject = initializeBean(beanName, exposedObject, mbd);
@@ -1061,7 +1051,7 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
         }
 
         if (pvs != null) {
-            //**对属性进行依赖注入
+            //对属性进行依赖注入
             applyPropertyValues(beanName, mbd, bw, pvs);
         }
     }
@@ -1283,10 +1273,7 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
         }
     }
 
-    /**
-     * 1. isWritableProperty: 属性可写
-     * 2. isNestedOrIndexedProperty: 是否循环嵌套
-     */
+    
     private boolean isConvertibleProperty(String propertyName, BeanWrapper bw) {
         try {
             return !PropertyAccessorUtils.isNestedOrIndexedProperty(propertyName) &&
@@ -1296,8 +1283,7 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
         }
     }
 
-    private Object convertForProperty(
-            Object value, String propertyName, BeanWrapper bw, TypeConverter converter) {
+    private Object convertForProperty(Object value, String propertyName, BeanWrapper bw, TypeConverter converter) {
 
         if (converter instanceof BeanWrapperImpl beanWrapper) {
             return beanWrapper.convertForProperty(value, propertyName);
@@ -1441,11 +1427,6 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
         this.factoryBeanInstanceCache.clear();
     }
 
-    Log getLogger() {
-        return logger;
-    }
-
-
     @SuppressWarnings("serial")
     private static class CreateFromClassBeanDefinition extends RootBeanDefinition {
 
@@ -1487,7 +1468,7 @@ public class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory impl
     }
 
 
-    private static class FactoryBeanMethodTypeFinder implements MethodCallback {
+    private static class FactoryBeanMethodTypeFinder implements ReflectionUtils.MethodCallback {
 
         private final String factoryMethodName;
 

@@ -3,6 +3,7 @@ package com.t13max.ioc.aop.framework.adapter;
 import com.t13max.ioc.aop.Advice;
 import com.t13max.ioc.aop.Advisor;
 import com.t13max.ioc.aop.MethodBeforeAdvice;
+import com.t13max.ioc.aop.intecept.MethodInterceptor;
 
 import java.io.Serializable;
 

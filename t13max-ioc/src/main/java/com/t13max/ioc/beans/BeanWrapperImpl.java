@@ -1,8 +1,9 @@
 package com.t13max.ioc.beans;
 
+import com.t13max.ioc.core.MethodParameter;
 import com.t13max.ioc.core.ResolvableType;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ReflectionUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ReflectionUtils;
 
 import java.beans.PropertyDescriptor;
 import java.lang.invoke.TypeDescriptor;
@@ -48,7 +49,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
     }
 
     @Override
-    public void setWrappedInstance(Object object, @Nullable String nestedPath, @Nullable Object rootObject) {
+    public void setWrappedInstance(Object object,  String nestedPath,  Object rootObject) {
         super.setWrappedInstance(object, nestedPath, rootObject);
         setIntrospectionClass(getWrappedClass());
     }
@@ -66,7 +67,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
         return this.cachedIntrospectionResults;
     }
 
-    public Object convertForProperty(@Nullable Object value, String propertyName) throws TypeMismatchException {
+    public Object convertForProperty( Object value, String propertyName) throws TypeMismatchException {
         CachedIntrospectionResults cachedIntrospectionResults = getCachedIntrospectionResults();
         PropertyDescriptor pd = cachedIntrospectionResults.getPropertyDescriptor(propertyName);
         if (pd == null) {
@@ -140,13 +141,13 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
         }
 
         @Override
-        @Nullable
+        
         public TypeDescriptor nested(int level) {
             return this.pd.getTypeDescriptor().nested(level);
         }
 
         @Override
-        @Nullable
+        
         public Object getValue() throws Exception {
             Method readMethod = this.pd.getReadMethod();
             Assert.state(readMethod != null, "No read method available");
@@ -155,14 +156,14 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
         }
 
         @Override
-        public void setValue(@Nullable Object value) throws Exception {
+        public void setValue( Object value) throws Exception {
             Method writeMethod = this.pd.getWriteMethodForActualAccess();
             ReflectionUtils.makeAccessible(writeMethod);
             writeMethod.invoke(getWrappedInstance(), value);
         }
 
         @Override
-        public boolean setValueFallbackIfPossible(@Nullable Object value) {
+        public boolean setValueFallbackIfPossible( Object value) {
             try {
                 Method writeMethod = this.pd.getWriteMethodFallback(value != null ? value.getClass() : null);
                 if (writeMethod == null) {

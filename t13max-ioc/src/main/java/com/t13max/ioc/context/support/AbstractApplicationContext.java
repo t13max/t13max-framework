@@ -1,16 +1,19 @@
 package com.t13max.ioc.context.support;
 
 import com.t13max.ioc.beans.BeansException;
-import com.t13max.ioc.beans.factory.BeanFactory;
-import com.t13max.ioc.beans.factory.BeanNotOfRequiredTypeException;
-import com.t13max.ioc.beans.factory.NoSuchBeanDefinitionException;
-import com.t13max.ioc.beans.factory.ObjectProvider;
+import com.t13max.ioc.beans.CachedIntrospectionResults;
+import com.t13max.ioc.beans.factory.*;
 import com.t13max.ioc.beans.factory.config.AutowireCapableBeanFactory;
 import com.t13max.ioc.beans.factory.config.BeanFactoryPostProcessor;
 import com.t13max.ioc.beans.factory.config.ConfigurableListableBeanFactory;
+import com.t13max.ioc.beans.support.ResourceEditorRegistrar;
 import com.t13max.ioc.context.*;
 import com.t13max.ioc.context.event.*;
+import com.t13max.ioc.context.weaving.LoadTimeWeaverAware;
+import com.t13max.ioc.context.weaving.LoadTimeWeaverAwareProcessor;
+import com.t13max.ioc.core.NativeDetector;
 import com.t13max.ioc.core.ResolvableType;
+import com.t13max.ioc.core.convert.ConversionService;
 import com.t13max.ioc.core.env.ConfigurableEnvironment;
 import com.t13max.ioc.core.env.Environment;
 import com.t13max.ioc.core.env.StandardEnvironment;
@@ -21,7 +24,7 @@ import com.t13max.ioc.core.io.support.PathMatchingResourcePatternResolver;
 import com.t13max.ioc.core.io.support.ResourcePatternResolver;
 import com.t13max.ioc.core.metrics.ApplicationStartup;
 import com.t13max.ioc.core.metrics.StartupStep;
-import com.t13max.ioc.utils.*;
+import com.t13max.ioc.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,7 +44,19 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public abstract class AbstractApplicationContext extends DefaultResourceLoader implements ConfigurableApplicationContext {
 
-    private final Logger logger = LogManager.getLogger(getClass());
+    public static final String MESSAGE_SOURCE_BEAN_NAME = "messageSource";
+
+    public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
+
+    public static final String LIFECYCLE_PROCESSOR_BEAN_NAME = "lifecycleProcessor";
+
+    static {
+        // Eagerly load the ContextClosedEvent class to avoid weird classloader issues
+        // on application shutdown in WebLogic 8.1. (Reported by Dustin Woods.)
+        ContextClosedEvent.class.getName();
+    }
+
+    protected final Logger logger = LogManager.getLogger(getClass());
 
     //id
     private String id = ObjectUtils.identityToString(this);
@@ -159,14 +174,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
     @Override
     public void publishEvent(ApplicationEvent event) {
-        //publishEvent(event, null);
+        publishEvent(event, null);
     }
 
     @Override
     public void publishEvent(Object event) {
-        //publishEvent(event, null);
+        publishEvent(event, null);
     }    
-    /*protected void publishEvent(Object event, ResolvableType typeHint) {
+    protected void publishEvent(Object event, ResolvableType typeHint) {
         Assert.notNull(event, "Event must not be null");
         ResolvableType eventType = null;
 
@@ -212,7 +227,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
                 this.parent.publishEvent(event);
             }
         }
-    }*/
+    }
+
+    ApplicationEventMulticaster getApplicationEventMulticaster() throws IllegalStateException {
+        if (this.applicationEventMulticaster == null) {
+            throw new IllegalStateException("ApplicationEventMulticaster not initialized - call 'refresh' before multicasting events via the context: " + this);
+        }
+        return this.applicationEventMulticaster;
+    }
 
     @Override
     public void setApplicationStartup(ApplicationStartup applicationStartup) {
@@ -280,6 +302,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
         this.applicationListeners.remove(listener);
     }
 
+    public Collection<ApplicationListener<?>> getApplicationListeners() {
+        return this.applicationListeners;
+    }
+
     /**
      * 刷新容器
      * 每次调用后重新加载bean
@@ -312,10 +338,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
 
                 StartupStep beanPostProcess = this.applicationStartup.start("spring.context.beans.post-process");
 
-                // 调用所有注册的 BeanFactoryPostProcessor 的 Bean
+                // 调用所有注册的BeanFactoryPostProcessor的Bean
                 invokeBeanFactoryPostProcessors(beanFactory);
 
-                // BeanPostProcessor是Bean后置处理器, 用于监听容器触发的事件
+                // BeanPostProcessor是Bean后置处理器,用于监听容器触发的事件
                 registerBeanPostProcessors(beanFactory);
 
                 beanPostProcess.end();
@@ -326,16 +352,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
                 // 初始化容器事件传播器
                 initApplicationEventMulticaster();
 
-                // 调用子类的某些特殊 Bean 初始化方法
+                // 调用子类的某些特殊Bean初始化方法
                 onRefresh();
 
-                // 为事件传播器注册事件监听器.
+                // 为事件传播器注册事件监听器
                 registerListeners();
 
-                // 初始化 Bean，并对 lazy-init 属性进行处理
+                // 初始化Bean, 并对lazy-init属性进行处理
                 finishBeanFactoryInitialization(beanFactory);
 
-                // 初始化容器的生命周期事件处理器，并发布容器的生命周期事件
+                // 初始化容器的生命周期事件处理器,并发布容器的生命周期事件
                 finishRefresh();
             } catch (RuntimeException | Error ex) {
                 if (logger.isWarnEnabled()) {
@@ -405,7 +431,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     protected void prepareBeanFactory(ConfigurableListableBeanFactory beanFactory) {
         // Tell the internal bean factory to use the context's class loader etc.
         beanFactory.setBeanClassLoader(getClassLoader());
-        beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
+        //beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
         beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
         // Configure the bean factory with context callbacks.
@@ -496,8 +522,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     protected void initApplicationEventMulticaster() {
         ConfigurableListableBeanFactory beanFactory = getBeanFactory();
         if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
-            this.applicationEventMulticaster =
-                    beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
+            this.applicationEventMulticaster = beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
             if (logger.isTraceEnabled()) {
                 logger.trace("Using ApplicationEventMulticaster [{}]", this.applicationEventMulticaster);
             }
@@ -558,10 +583,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
     @SuppressWarnings("unchecked")
     protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
         // Initialize bootstrap executor for this context.
-        if (beanFactory.containsBean(BOOTSTRAP_EXECUTOR_BEAN_NAME) &&
-                beanFactory.isTypeMatch(BOOTSTRAP_EXECUTOR_BEAN_NAME, Executor.class)) {
-            beanFactory.setBootstrapExecutor(
-                    beanFactory.getBean(BOOTSTRAP_EXECUTOR_BEAN_NAME, Executor.class));
+        if (beanFactory.containsBean(BOOTSTRAP_EXECUTOR_BEAN_NAME) && beanFactory.isTypeMatch(BOOTSTRAP_EXECUTOR_BEAN_NAME, Executor.class)) {
+            beanFactory.setBootstrapExecutor(beanFactory.getBean(BOOTSTRAP_EXECUTOR_BEAN_NAME, Executor.class));
         }
 
         // Initialize conversion service for this context.
@@ -589,8 +612,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader i
                 beanFactory.getBean(weaverAwareName, LoadTimeWeaverAware.class);
             } catch (BeanNotOfRequiredTypeException ex) {
                 if (logger.isDebugEnabled()) {
-                    logger.debug("Failed to initialize LoadTimeWeaverAware bean '" + weaverAwareName +
-                            "' due to unexpected type mismatch: " + ex.getMessage());
+                    logger.debug("Failed to initialize LoadTimeWeaverAware bean '{}' due to unexpected type mismatch: {}", weaverAwareName, ex.getMessage());
                 }
             }
         }

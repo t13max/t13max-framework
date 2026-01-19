@@ -2,9 +2,9 @@ package com.t13max.ioc.beans.factory.config;
 
 import com.t13max.ioc.beans.BeanMetadataElement;
 import com.t13max.ioc.beans.factory.BeanFactoryUtils;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ObjectUtils;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ObjectUtils;
+import com.t13max.ioc.util.StringUtils;
 
 /**
  * @Author: t13max

@@ -2,8 +2,8 @@ package com.t13max.ioc.beans.factory.support;
 
 import com.t13max.ioc.beans.factory.BeanFactory;
 import com.t13max.ioc.beans.factory.config.ConfigurableBeanFactory;
-import com.t13max.ioc.utils.ReflectionUtils;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.ReflectionUtils;
+import com.t13max.ioc.util.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -21,7 +21,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
         return currentlyInvokedFactoryMethod.get();
     }
 
-    public static void setCurrentlyInvokedFactoryMethod(@Nullable Method method) {
+    public static void setCurrentlyInvokedFactoryMethod( Method method) {
         if (method != null) {
             currentlyInvokedFactoryMethod.set(method);
         }
@@ -32,7 +32,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 
     //使用初始化策略实例化bean对象
     @Override
-    public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
+    public Object instantiate(RootBeanDefinition bd,  String beanName, BeanFactory owner) {
         // 如果配置的bean中没有方法覆盖,则使用Java的反射机制实例化对象,
         if (!bd.hasMethodOverrides()) {
             Constructor<?> constructorToUse;
@@ -65,12 +65,12 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
         }
     }
 
-    protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner) {
+    protected Object instantiateWithMethodInjection(RootBeanDefinition bd,  String beanName, BeanFactory owner) {
         throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
     }
 
     @Override
-    public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner, Constructor<?> ctor, Object... args) {
+    public Object instantiate(RootBeanDefinition bd,  String beanName, BeanFactory owner, Constructor<?> ctor, Object... args) {
 
         if (!bd.hasMethodOverrides()) {
             return BeanUtils.instantiateClass(ctor, args);
@@ -80,12 +80,12 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
         }
     }
 
-    protected Object instantiateWithMethodInjection(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner, @Nullable Constructor<?> ctor, Object... args) {
+    protected Object instantiateWithMethodInjection(RootBeanDefinition bd,  String beanName, BeanFactory owner,  Constructor<?> ctor, Object... args) {
         throw new UnsupportedOperationException("Method Injection not supported in SimpleInstantiationStrategy");
     }
 
     @Override
-    public Object instantiate(RootBeanDefinition bd, @Nullable String beanName, BeanFactory owner, @Nullable Object factoryBean, Method factoryMethod, Object... args) {
+    public Object instantiate(RootBeanDefinition bd,  String beanName, BeanFactory owner,  Object factoryBean, Method factoryMethod, Object... args) {
 
         try {
             ReflectionUtils.makeAccessible(factoryMethod);

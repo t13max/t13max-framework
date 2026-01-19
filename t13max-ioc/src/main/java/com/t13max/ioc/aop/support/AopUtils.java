@@ -1,9 +1,9 @@
 package com.t13max.ioc.aop.support;
 
 import com.t13max.ioc.aop.*;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ClassUtils;
-import com.t13max.ioc.utils.ReflectionUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ClassUtils;
+import com.t13max.ioc.util.ReflectionUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -22,58 +22,17 @@ public class AopUtils {
     private static final boolean coroutinesReactorPresent = ClassUtils.isPresent(
             "kotlinx.coroutines.reactor.MonoKt", AopUtils.class.getClassLoader());
 
-
-    /**
-     * Check whether the given object is a JDK dynamic proxy or a CGLIB proxy.
-     * <p>This method additionally checks if the given object is an instance
-     * of {@link SpringProxy}.
-     *
-     * @param object the object to check
-     * @see #isJdkDynamicProxy
-     * @see #isCglibProxy
-     */
-    public static boolean isAopProxy(@Nullable Object object) {
+    public static boolean isAopProxy( Object object) {
         return (object instanceof SpringProxy && (Proxy.isProxyClass(object.getClass()) ||
                 object.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR)));
     }
-
-    /**
-     * Check whether the given object is a JDK dynamic proxy.
-     * <p>This method goes beyond the implementation of
-     * {@link Proxy#isProxyClass(Class)} by additionally checking if the
-     * given object is an instance of {@link SpringProxy}.
-     *
-     * @param object the object to check
-     * @see java.lang.reflect.Proxy#isProxyClass
-     */
-    public static boolean isJdkDynamicProxy(@Nullable Object object) {
+    public static boolean isJdkDynamicProxy( Object object) {
         return (object instanceof SpringProxy && Proxy.isProxyClass(object.getClass()));
     }
-
-    /**
-     * Check whether the given object is a CGLIB proxy.
-     * <p>This method goes beyond the implementation of
-     * {@link ClassUtils#isCglibProxy(Object)} by additionally checking if
-     * the given object is an instance of {@link SpringProxy}.
-     *
-     * @param object the object to check
-     * @see ClassUtils#isCglibProxy(Object)
-     */
-    public static boolean isCglibProxy(@Nullable Object object) {
+    public static boolean isCglibProxy( Object object) {
         return (object instanceof SpringProxy &&
                 object.getClass().getName().contains(ClassUtils.CGLIB_CLASS_SEPARATOR));
     }
-
-    /**
-     * Determine the target class of the given bean instance which might be an AOP proxy.
-     * <p>Returns the target class for an AOP proxy or the plain class otherwise.
-     *
-     * @param candidate the instance to check (might be an AOP proxy)
-     * @return the target class (or the plain class of the given object as fallback;
-     * never {@code null})
-     * @see org.springframework.aop.TargetClassAware#getTargetClass()
-     * @see org.springframework.aop.framework.AopProxyUtils#ultimateTargetClass(Object)
-     */
     public static Class<?> getTargetClass(Object candidate) {
         Assert.notNull(candidate, "Candidate object must not be null");
         Class<?> result = null;
@@ -85,21 +44,7 @@ public class AopUtils {
         }
         return result;
     }
-
-    /**
-     * Select an invocable method on the target type: either the given method itself
-     * if actually exposed on the target type, or otherwise a corresponding method
-     * on one of the target type's interfaces or on the target type itself.
-     *
-     * @param method     the method to check
-     * @param targetType the target type to search methods on (typically an AOP proxy)
-     * @return a corresponding invocable method on the target type
-     * @throws IllegalStateException if the given method is not invocable on the given
-     *                               target type (typically due to a proxy mismatch)
-     * @see MethodIntrospector#selectInvocableMethod(Method, Class)
-     * @since 4.3
-     */
-    public static Method selectInvocableMethod(Method method, @Nullable Class<?> targetType) {
+    public static Method selectInvocableMethod(Method method,  Class<?> targetType) {
         if (targetType == null) {
             return method;
         }
@@ -113,91 +58,26 @@ public class AopUtils {
         }
         return methodToUse;
     }
-
-    /**
-     * Determine whether the given method is an "equals" method.
-     *
-     * @see java.lang.Object#equals
-     */
-    public static boolean isEqualsMethod(@Nullable Method method) {
+    public static boolean isEqualsMethod( Method method) {
         return ReflectionUtils.isEqualsMethod(method);
     }
-
-    /**
-     * Determine whether the given method is a "hashCode" method.
-     *
-     * @see java.lang.Object#hashCode
-     */
-    public static boolean isHashCodeMethod(@Nullable Method method) {
+    public static boolean isHashCodeMethod( Method method) {
         return ReflectionUtils.isHashCodeMethod(method);
     }
-
-    /**
-     * Determine whether the given method is a "toString" method.
-     *
-     * @see java.lang.Object#toString()
-     */
-    public static boolean isToStringMethod(@Nullable Method method) {
+    public static boolean isToStringMethod( Method method) {
         return ReflectionUtils.isToStringMethod(method);
     }
-
-    /**
-     * Determine whether the given method is a "finalize" method.
-     *
-     * @see java.lang.Object#finalize()
-     */
-    public static boolean isFinalizeMethod(@Nullable Method method) {
+    public static boolean isFinalizeMethod( Method method) {
         return (method != null && method.getName().equals("finalize") &&
                 method.getParameterCount() == 0);
     }
-
-    /**
-     * Given a method, which may come from an interface, and a target class used
-     * in the current AOP invocation, find the corresponding target method if there
-     * is one. E.g. the method may be {@code IFoo.bar()} and the target class
-     * may be {@code DefaultFoo}. In this case, the method may be
-     * {@code DefaultFoo.bar()}. This enables attributes on that method to be found.
-     * <p><b>NOTE:</b> In contrast to {@link org.springframework.util.ClassUtils#getMostSpecificMethod},
-     * this method resolves bridge methods in order to retrieve attributes from
-     * the <i>original</i> method definition.
-     *
-     * @param method      the method to be invoked, which may come from an interface
-     * @param targetClass the target class for the current invocation
-     *                    (can be {@code null} or may not even implement the method)
-     * @return the specific target method, or the original method if the
-     * {@code targetClass} does not implement it
-     * @see org.springframework.util.ClassUtils#getMostSpecificMethod
-     * @see org.springframework.core.BridgeMethodResolver#getMostSpecificMethod
-     */
-    public static Method getMostSpecificMethod(Method method, @Nullable Class<?> targetClass) {
+    public static Method getMostSpecificMethod(Method method,  Class<?> targetClass) {
         Class<?> specificTargetClass = (targetClass != null ? ClassUtils.getUserClass(targetClass) : null);
         return BridgeMethodResolver.getMostSpecificMethod(method, specificTargetClass);
     }
-
-    /**
-     * Can the given pointcut apply at all on the given class?
-     * <p>This is an important test as it can be used to optimize
-     * out a pointcut for a class.
-     *
-     * @param pc          the static or dynamic pointcut to check
-     * @param targetClass the class to test
-     * @return whether the pointcut can apply on any method
-     */
     public static boolean canApply(Pointcut pc, Class<?> targetClass) {
         return canApply(pc, targetClass, false);
     }
-
-    /**
-     * Can the given pointcut apply at all on the given class?
-     * <p>This is an important test as it can be used to optimize
-     * out a pointcut for a class.
-     *
-     * @param pc               the static or dynamic pointcut to check
-     * @param targetClass      the class to test
-     * @param hasIntroductions whether the advisor chain
-     *                         for this bean includes any introductions
-     * @return whether the pointcut can apply on any method
-     */
     public static boolean canApply(Pointcut pc, Class<?> targetClass, boolean hasIntroductions) {
         Assert.notNull(pc, "Pointcut must not be null");
         if (!pc.getClassFilter().matches(targetClass)) {
@@ -234,31 +114,9 @@ public class AopUtils {
 
         return false;
     }
-
-    /**
-     * Can the given advisor apply at all on the given class?
-     * This is an important test as it can be used to optimize
-     * out an advisor for a class.
-     *
-     * @param advisor     the advisor to check
-     * @param targetClass class we're testing
-     * @return whether the pointcut can apply on any method
-     */
     public static boolean canApply(Advisor advisor, Class<?> targetClass) {
         return canApply(advisor, targetClass, false);
     }
-
-    /**
-     * Can the given advisor apply at all on the given class?
-     * <p>This is an important test as it can be used to optimize out an advisor for a class.
-     * This version also takes into account introductions (for IntroductionAwareMethodMatchers).
-     *
-     * @param advisor          the advisor to check
-     * @param targetClass      class we're testing
-     * @param hasIntroductions whether the advisor chain for this bean includes
-     *                         any introductions
-     * @return whether the pointcut can apply on any method
-     */
     public static boolean canApply(Advisor advisor, Class<?> targetClass, boolean hasIntroductions) {
         if (advisor instanceof IntroductionAdvisor ia) {
             return ia.getClassFilter().matches(targetClass);
@@ -269,16 +127,6 @@ public class AopUtils {
             return true;
         }
     }
-
-    /**
-     * Determine the sublist of the {@code candidateAdvisors} list
-     * that is applicable to the given class.
-     *
-     * @param candidateAdvisors the Advisors to evaluate
-     * @param clazz             the target class
-     * @return sublist of Advisors that can apply to an object of the given class
-     * (may be the incoming List as-is)
-     */
     public static List<Advisor> findAdvisorsThatCanApply(List<Advisor> candidateAdvisors, Class<?> clazz) {
         if (candidateAdvisors.isEmpty()) {
             return candidateAdvisors;
@@ -303,7 +151,7 @@ public class AopUtils {
     }
 
     //使用spring的反射机制, 调用目标方法method的invoke方法
-    public static Object invokeJoinpointUsingReflection(@Nullable Object target, Method method, Object[] args) throws Throwable {
+    public static Object invokeJoinpointUsingReflection( Object target, Method method, Object[] args) throws Throwable {
 
         // Use reflection to invoke the method.
         try {
@@ -326,7 +174,7 @@ public class AopUtils {
 
     private static class KotlinDelegate {
 
-        public static Object invokeSuspendingFunction(Method method, @Nullable Object target, Object... args) {
+        public static Object invokeSuspendingFunction(Method method,  Object target, Object... args) {
             Continuation<?> continuation = (Continuation<?>) args[args.length - 1];
             Assert.state(continuation != null, "No Continuation available");
             CoroutineContext context = continuation.getContext().minusKey(Job.Key);

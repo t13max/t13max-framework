@@ -1,7 +1,7 @@
 package com.t13max.ioc.beans.factory;
 
 import com.t13max.ioc.beans.BeansException;
-import com.t13max.ioc.utils.ClassUtils;
+import com.t13max.ioc.util.ClassUtils;
 
 /**
  * @Author: t13max

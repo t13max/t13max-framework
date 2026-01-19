@@ -1,8 +1,8 @@
 package com.t13max.ioc.core;
 
-import com.t13max.ioc.utils.ConcurrentReferenceHashMap;
-import com.t13max.ioc.utils.ObjectUtils;
-import com.t13max.ioc.utils.ReflectionUtils;
+import com.t13max.ioc.util.ConcurrentReferenceHashMap;
+import com.t13max.ioc.util.ObjectUtils;
+import com.t13max.ioc.util.ReflectionUtils;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -23,26 +23,18 @@ public class SerializableTypeWrapper {
 
     private SerializableTypeWrapper() {
     }
-
-    
     public static Type forField(Field field) {
         return forTypeProvider(new FieldTypeProvider(field));
-    }
-    
-    public static Type forMethodParameter(MethodParameter methodParameter) {
+    }    public static Type forMethodParameter(MethodParameter methodParameter) {
         return forTypeProvider(new MethodParameterTypeProvider(methodParameter));
-    }
-    
-    @SuppressWarnings("unchecked")
+    }    @SuppressWarnings("unchecked")
     public static <T extends Type> T unwrap(T type) {
         Type unwrapped = null;
         if (type instanceof SerializableTypeProxy proxy) {
             unwrapped = proxy.getTypeProvider().getType();
         }
         return (unwrapped != null ? (T) unwrapped : type);
-    }
-    
-    static Type forTypeProvider(TypeProvider provider) {
+    }    static Type forTypeProvider(TypeProvider provider) {
         Type providedType = provider.getType();
         if (providedType == null || providedType instanceof Serializable) {
             // No serializable type wrapping necessary (for example, for java.lang.Class)
@@ -71,15 +63,11 @@ public class SerializableTypeWrapper {
         }
         throw new IllegalArgumentException("Unsupported Type class: " + providedType.getClass().getName());
     }
-
-    
     interface SerializableTypeProxy {
 
         
         TypeProvider getTypeProvider();
     }
-
-    
     @SuppressWarnings("serial")
     interface TypeProvider extends Serializable {
 
@@ -91,8 +79,6 @@ public class SerializableTypeWrapper {
             return null;
         }
     }
-
-    
     @SuppressWarnings("serial")
     private static class TypeProxyInvocationHandler implements InvocationHandler, Serializable {
 
@@ -144,8 +130,6 @@ public class SerializableTypeWrapper {
             return ReflectionUtils.invokeMethod(method, type, args);
         }
     }
-
-    
     @SuppressWarnings("serial")
     static class FieldTypeProvider implements TypeProvider {
 
@@ -181,8 +165,6 @@ public class SerializableTypeWrapper {
             }
         }
     }
-
-    
     @SuppressWarnings("serial")
     static class MethodParameterTypeProvider implements TypeProvider {
 
@@ -231,8 +213,6 @@ public class SerializableTypeWrapper {
             }
         }
     }
-
-    
     @SuppressWarnings("serial")
     static class MethodInvokeTypeProvider implements TypeProvider {
 

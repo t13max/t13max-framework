@@ -1,12 +1,17 @@
 package com.t13max.ioc.beans.factory.support;
 
 import com.t13max.ioc.beans.BeansException;
+import com.t13max.ioc.beans.TypeConverter;
 import com.t13max.ioc.beans.factory.*;
+import com.t13max.ioc.beans.factory.InjectionPoint;
 import com.t13max.ioc.beans.factory.config.*;
-import com.t13max.ioc.core.ResolvableType;
+import com.t13max.ioc.core.*;
+import com.t13max.ioc.core.annotation.MergedAnnotation;
+import com.t13max.ioc.core.annotation.MergedAnnotations;
+import com.t13max.ioc.core.log.LogMessage;
 import com.t13max.ioc.core.metrics.StartupStep;
 import com.t13max.ioc.lang.Contract;
-import com.t13max.ioc.utils.*;
+import com.t13max.ioc.util.*;
 
 import java.io.*;
 import java.lang.annotation.Annotation;
@@ -29,21 +34,18 @@ import java.util.stream.Stream;
  */
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
-
     public static final String STRICT_LOCKING_PROPERTY_NAME = "spring.locking.strict";
 
     private static Class<?> jakartaInjectProviderClass;
 
     static {
         try {
-            jakartaInjectProviderClass =
-                    ClassUtils.forName("jakarta.inject.Provider", DefaultListableBeanFactory.class.getClassLoader());
+            jakartaInjectProviderClass = ClassUtils.forName("jakarta.inject.Provider", DefaultListableBeanFactory.class.getClassLoader());
         } catch (ClassNotFoundException ex) {
             // JSR-330 API not available - Provider interface simply not supported then.
             jakartaInjectProviderClass = null;
         }
     }
-
 
     private static final Map<String, Reference<DefaultListableBeanFactory>> serializableFactories = new ConcurrentHashMap<>(8);
 
@@ -94,7 +96,6 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     public DefaultListableBeanFactory(BeanFactory parentBeanFactory) {
         super(parentBeanFactory);
     }
-
 
     public void setSerializationId(String serializationId) {
         if (serializationId != null) {
@@ -598,7 +599,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         Class<?> beanType = getType(beanName, allowFactoryBeanInit);
         if (beanType != null) {
             MergedAnnotation<A> annotation =
-                    MergedAnnotations.from(beanType, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
+                    MergedAnnotations.from(beanType, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY).get(annotationType);
             if (annotation.isPresent()) {
                 return annotation.synthesize();
             }
@@ -610,7 +611,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
                 Class<?> beanClass = bd.getBeanClass();
                 if (beanClass != beanType) {
                     MergedAnnotation<A> annotation =
-                            MergedAnnotations.from(beanClass, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
+                            MergedAnnotations.from(beanClass, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY).get(annotationType);
                     if (annotation.isPresent()) {
                         return annotation.synthesize();
                     }
@@ -620,7 +621,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             Method factoryMethod = bd.getResolvedFactoryMethod();
             if (factoryMethod != null) {
                 MergedAnnotation<A> annotation =
-                        MergedAnnotations.from(factoryMethod, SearchStrategy.TYPE_HIERARCHY).get(annotationType);
+                        MergedAnnotations.from(factoryMethod, MergedAnnotations.SearchStrategy.TYPE_HIERARCHY).get(annotationType);
                 if (annotation.isPresent()) {
                     return annotation.synthesize();
                 }
@@ -1317,8 +1318,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     }
 
     @SuppressWarnings("NullAway") // Dataflow analysis limitation
-    public Object doResolveDependency(DependencyDescriptor descriptor, String beanName,
-                                      Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
+    public Object doResolveDependency(DependencyDescriptor descriptor, String beanName, Set<String> autowiredBeanNames, TypeConverter typeConverter) throws BeansException {
 
         InjectionPoint previousInjectionPoint = ConstructorResolver.setCurrentInjectionPoint(descriptor);
         try {
@@ -1496,8 +1496,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     }
 
 
-    private Object resolveMultipleBeansFallback(DependencyDescriptor descriptor, String beanName,
-                                                Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+    private Object resolveMultipleBeansFallback(DependencyDescriptor descriptor, String beanName, Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 
         Class<?> type = descriptor.getDependencyType();
 
@@ -1509,8 +1508,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         return null;
     }
 
-    private Object resolveMultipleBeanCollection(DependencyDescriptor descriptor, String beanName,
-                                                 Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+    private Object resolveMultipleBeanCollection(DependencyDescriptor descriptor, String beanName, Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 
         Class<?> elementType = descriptor.getResolvableType().asCollection().resolveGeneric();
         if (elementType == null) {
@@ -1535,8 +1533,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
         return result;
     }
 
-    private Object resolveMultipleBeanMap(DependencyDescriptor descriptor, String beanName,
-                                          Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+    private Object resolveMultipleBeanMap(DependencyDescriptor descriptor, String beanName, Set<String> autowiredBeanNames, TypeConverter typeConverter) {
 
         ResolvableType mapType = descriptor.getResolvableType().asMap();
         Class<?> keyType = mapType.resolveGeneric(0);
@@ -2180,7 +2177,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             return new Jsr330Provider(descriptor, beanName);
         }
 
-        private class Jsr330Provider extends DependencyObjectProvider implements Provider<Object> {
+        private class Jsr330Provider extends DependencyObjectProvider implements Supplier<Object> {
 
             public Jsr330Provider(DependencyDescriptor descriptor, String beanName) {
                 super(descriptor, beanName);

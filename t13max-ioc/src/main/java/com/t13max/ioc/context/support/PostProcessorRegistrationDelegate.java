@@ -1,9 +1,15 @@
 package com.t13max.ioc.context.support;
 
+import com.t13max.ioc.beans.PropertyValue;
 import com.t13max.ioc.beans.factory.config.*;
 import com.t13max.ioc.beans.factory.support.*;
+import com.t13max.ioc.core.OrderComparator;
+import com.t13max.ioc.core.Ordered;
+import com.t13max.ioc.core.PriorityOrdered;
 import com.t13max.ioc.core.metrics.ApplicationStartup;
 import com.t13max.ioc.core.metrics.StartupStep;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -31,8 +37,7 @@ public class PostProcessorRegistrationDelegate {
                 if (postProcessor instanceof BeanDefinitionRegistryPostProcessor registryProcessor) {
                     registryProcessor.postProcessBeanDefinitionRegistry(registry);
                     registryProcessors.add(registryProcessor);
-                }
-                else {
+                } else {
                     regularPostProcessors.add(postProcessor);
                 }
             }
@@ -90,9 +95,7 @@ public class PostProcessorRegistrationDelegate {
             // Now, invoke the postProcessBeanFactory callback of all processors handled so far.
             invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
             invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
-        }
-
-        else {
+        } else {
             // Invoke factory processors registered with the context instance.
             invokeBeanFactoryPostProcessors(beanFactoryPostProcessors, beanFactory);
         }
@@ -110,14 +113,11 @@ public class PostProcessorRegistrationDelegate {
         for (String ppName : postProcessorNames) {
             if (processedBeans.contains(ppName)) {
                 // skip - already processed in first phase above
-            }
-            else if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+            } else if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
                 priorityOrderedPostProcessors.add(beanFactory.getBean(ppName, BeanFactoryPostProcessor.class));
-            }
-            else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+            } else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
                 orderedPostProcessorNames.add(ppName);
-            }
-            else {
+            } else {
                 nonOrderedPostProcessorNames.add(ppName);
             }
         }
@@ -184,11 +184,9 @@ public class PostProcessorRegistrationDelegate {
                 if (pp instanceof MergedBeanDefinitionPostProcessor) {
                     internalPostProcessors.add(pp);
                 }
-            }
-            else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+            } else if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
                 orderedPostProcessorNames.add(ppName);
-            }
-            else {
+            } else {
                 nonOrderedPostProcessorNames.add(ppName);
             }
         }
@@ -229,13 +227,6 @@ public class PostProcessorRegistrationDelegate {
         beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(applicationContext));
     }
 
-    /**
-     * Load and sort the post-processors of the specified type.
-     * @param beanFactory the bean factory to use
-     * @param beanPostProcessorType the post-processor type
-     * @param <T> the post-processor type
-     * @return a list of sorted post-processors for the specified type
-     */
     static <T extends BeanPostProcessor> List<T> loadBeanPostProcessors(
             ConfigurableListableBeanFactory beanFactory, Class<T> beanPostProcessorType) {
 
@@ -249,13 +240,6 @@ public class PostProcessorRegistrationDelegate {
 
     }
 
-    /**
-     * Selectively invoke {@link MergedBeanDefinitionPostProcessor} instances
-     * registered in the specified bean factory, resolving bean definitions and
-     * any attributes if necessary as well as any inner bean definitions that
-     * they may contain.
-     * @param beanFactory the bean factory to use
-     */
     static void invokeMergedBeanDefinitionPostProcessors(DefaultListableBeanFactory beanFactory) {
         new MergedBeanDefinitionPostProcessorInvoker(beanFactory).invokeMergedBeanDefinitionPostProcessors();
     }
@@ -275,9 +259,6 @@ public class PostProcessorRegistrationDelegate {
         postProcessors.sort(comparatorToUse);
     }
 
-    /**
-     * Invoke the given BeanDefinitionRegistryPostProcessor beans.
-     */
     private static void invokeBeanDefinitionRegistryPostProcessors(
             Collection<? extends BeanDefinitionRegistryPostProcessor> postProcessors, BeanDefinitionRegistry registry, ApplicationStartup applicationStartup) {
 
@@ -289,9 +270,6 @@ public class PostProcessorRegistrationDelegate {
         }
     }
 
-    /**
-     * Invoke the given BeanFactoryPostProcessor beans.
-     */
     private static void invokeBeanFactoryPostProcessors(Collection<? extends BeanFactoryPostProcessor> postProcessors, ConfigurableListableBeanFactory beanFactory) {
 
         for (BeanFactoryPostProcessor postProcessor : postProcessors) {
@@ -302,31 +280,21 @@ public class PostProcessorRegistrationDelegate {
         }
     }
 
-    /**
-     * Register the given BeanPostProcessor beans.
-     */
     private static void registerBeanPostProcessors(ConfigurableListableBeanFactory beanFactory, List<? extends BeanPostProcessor> postProcessors) {
 
         if (beanFactory instanceof AbstractBeanFactory abstractBeanFactory) {
             // Bulk addition is more efficient against our CopyOnWriteArrayList there
             abstractBeanFactory.addBeanPostProcessors(postProcessors);
-        }
-        else {
+        } else {
             for (BeanPostProcessor postProcessor : postProcessors) {
                 beanFactory.addBeanPostProcessor(postProcessor);
             }
         }
     }
 
-
-    /**
-     * BeanPostProcessor that logs a warn message when a bean is created during
-     * BeanPostProcessor instantiation, i.e. when a bean is not eligible for
-     * getting processed by all BeanPostProcessors.
-     */
     private static final class BeanPostProcessorChecker implements BeanPostProcessor {
 
-        private static final Log logger = LogFactory.getLog(BeanPostProcessorChecker.class);
+        private static final Logger logger = LogManager.getLogger(BeanPostProcessorChecker.class);
 
         private final ConfigurableListableBeanFactory beanFactory;
 
@@ -381,7 +349,7 @@ public class PostProcessorRegistrationDelegate {
             return bean;
         }
 
-        private boolean isInfrastructureBean(@Nullable String beanName) {
+        private boolean isInfrastructureBean(String beanName) {
             if (beanName != null && this.beanFactory.containsBeanDefinition(beanName)) {
                 BeanDefinition bd = this.beanFactory.getBeanDefinition(beanName);
                 return (bd.getRole() == BeanDefinition.ROLE_INFRASTRUCTURE);
@@ -419,29 +387,27 @@ public class PostProcessorRegistrationDelegate {
             for (PropertyValue propertyValue : bd.getPropertyValues().getPropertyValueList()) {
                 postProcessValue(postProcessors, valueResolver, propertyValue.getValue());
             }
-            for (ValueHolder valueHolder : bd.getConstructorArgumentValues().getIndexedArgumentValues().values()) {
+            for (ConstructorArgumentValues.ValueHolder valueHolder : bd.getConstructorArgumentValues().getIndexedArgumentValues().values()) {
                 postProcessValue(postProcessors, valueResolver, valueHolder.getValue());
             }
-            for (ValueHolder valueHolder : bd.getConstructorArgumentValues().getGenericArgumentValues()) {
+            for (ConstructorArgumentValues.ValueHolder valueHolder : bd.getConstructorArgumentValues().getGenericArgumentValues()) {
                 postProcessValue(postProcessors, valueResolver, valueHolder.getValue());
             }
         }
 
         private void postProcessValue(List<MergedBeanDefinitionPostProcessor> postProcessors,
-                                      BeanDefinitionValueResolver valueResolver, @Nullable Object value) {
+                                      BeanDefinitionValueResolver valueResolver, Object value) {
             if (value instanceof BeanDefinitionHolder bdh
                     && bdh.getBeanDefinition() instanceof AbstractBeanDefinition innerBd) {
 
                 Class<?> innerBeanType = resolveBeanType(innerBd);
                 resolveInnerBeanDefinition(valueResolver, innerBd, (innerBeanName, innerBeanDefinition)
                         -> postProcessRootBeanDefinition(postProcessors, innerBeanName, innerBeanType, innerBeanDefinition));
-            }
-            else if (value instanceof AbstractBeanDefinition innerBd) {
+            } else if (value instanceof AbstractBeanDefinition innerBd) {
                 Class<?> innerBeanType = resolveBeanType(innerBd);
                 resolveInnerBeanDefinition(valueResolver, innerBd, (innerBeanName, innerBeanDefinition)
                         -> postProcessRootBeanDefinition(postProcessors, innerBeanName, innerBeanType, innerBeanDefinition));
-            }
-            else if (value instanceof TypedStringValue typedStringValue) {
+            } else if (value instanceof TypedStringValue typedStringValue) {
                 resolveTypeStringValue(typedStringValue);
             }
         }
@@ -458,8 +424,7 @@ public class PostProcessorRegistrationDelegate {
         private void resolveTypeStringValue(TypedStringValue typedStringValue) {
             try {
                 typedStringValue.resolveTargetType(this.beanFactory.getBeanClassLoader());
-            }
-            catch (ClassNotFoundException ex) {
+            } catch (ClassNotFoundException ex) {
                 // ignore
             }
         }
@@ -468,8 +433,7 @@ public class PostProcessorRegistrationDelegate {
             if (!bd.hasBeanClass()) {
                 try {
                     bd.resolveBeanClass(this.beanFactory.getBeanClassLoader());
-                }
-                catch (ClassNotFoundException ex) {
+                } catch (ClassNotFoundException ex) {
                     // ignore
                 }
             }

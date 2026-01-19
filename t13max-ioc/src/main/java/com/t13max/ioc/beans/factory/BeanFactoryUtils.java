@@ -2,8 +2,8 @@ package com.t13max.ioc.beans.factory;
 
 import com.t13max.ioc.beans.BeansException;
 import com.t13max.ioc.core.ResolvableType;
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.StringUtils;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -13,25 +13,18 @@ import java.util.concurrent.ConcurrentHashMap;
  * @Author: t13max
  * @Since: 22:52 2026/1/15
  */
-public class BeanFactoryUtils {
-
-    
-    public static final String GENERATED_BEAN_NAME_SEPARATOR = "#";
-    
+public class BeanFactoryUtils {    
+    public static final String GENERATED_BEAN_NAME_SEPARATOR = "#";    
     private static final Map<String, String> transformedBeanNameCache = new ConcurrentHashMap<>();
-
     
-    public static boolean isFactoryDereference(String name) {
+    public static boolean isFactoryDereference( String name) {
         return (name != null && !name.isEmpty() && name.charAt(0) == BeanFactory.FACTORY_BEAN_PREFIX_CHAR);
-    }
-    
+    }    
     public static String transformedBeanName(String name) {
         Assert.notNull(name, "'name' must not be null");
-        // 名字不是 & 开头直接返回
         if (name.isEmpty() || name.charAt(0) != BeanFactory.FACTORY_BEAN_PREFIX_CHAR) {
             return name;
         }
-        // 截取字符串 在返回
         return transformedBeanNameCache.computeIfAbsent(name, beanName -> {
             do {
                 beanName = beanName.substring(1);  // length of '&'
@@ -39,12 +32,10 @@ public class BeanFactoryUtils {
             while (beanName.charAt(0) == BeanFactory.FACTORY_BEAN_PREFIX_CHAR);
             return beanName;
         });
-    }
-    
+    }    
     public static boolean isGeneratedBeanName( String name) {
         return (name != null && name.contains(GENERATED_BEAN_NAME_SEPARATOR));
-    }
-    
+    }    
     public static String originalBeanName(String name) {
         Assert.notNull(name, "'name' must not be null");
         int separatorIndex = name.indexOf(GENERATED_BEAN_NAME_SEPARATOR);
@@ -52,16 +43,13 @@ public class BeanFactoryUtils {
     }
 
 
-    // Retrieval of bean names
-    
+    // Retrieval of bean names    
     public static int countBeansIncludingAncestors(ListableBeanFactory lbf) {
         return beanNamesIncludingAncestors(lbf).length;
-    }
-    
+    }    
     public static String[] beanNamesIncludingAncestors(ListableBeanFactory lbf) {
         return beanNamesForTypeIncludingAncestors(lbf, Object.class);
-    }
-    
+    }    
     public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, ResolvableType type) {
         Assert.notNull(lbf, "ListableBeanFactory must not be null");
         String[] result = lbf.getBeanNamesForType(type);
@@ -72,8 +60,7 @@ public class BeanFactoryUtils {
             }
         }
         return result;
-    }
-    
+    }    
     public static String[] beanNamesForTypeIncludingAncestors(
             ListableBeanFactory lbf, ResolvableType type, boolean includeNonSingletons, boolean allowEagerInit) {
 
@@ -87,8 +74,7 @@ public class BeanFactoryUtils {
             }
         }
         return result;
-    }
-    
+    }    
     public static String[] beanNamesForTypeIncludingAncestors(ListableBeanFactory lbf, Class<?> type) {
         Assert.notNull(lbf, "ListableBeanFactory must not be null");
         String[] result = lbf.getBeanNamesForType(type);
@@ -99,8 +85,7 @@ public class BeanFactoryUtils {
             }
         }
         return result;
-    }
-    
+    }    
     public static String[] beanNamesForTypeIncludingAncestors(
             ListableBeanFactory lbf, Class<?> type, boolean includeNonSingletons, boolean allowEagerInit) {
 
@@ -114,8 +99,7 @@ public class BeanFactoryUtils {
             }
         }
         return result;
-    }
-    
+    }    
     public static String[] beanNamesForAnnotationIncludingAncestors(
             ListableBeanFactory lbf, Class<? extends Annotation> annotationType) {
 
@@ -131,8 +115,7 @@ public class BeanFactoryUtils {
     }
 
 
-    // Retrieval of bean instances
-    
+    // Retrieval of bean instances    
     public static <T> Map<String, T> beansOfTypeIncludingAncestors(ListableBeanFactory lbf, Class<T> type)
             throws BeansException {
 
@@ -150,8 +133,7 @@ public class BeanFactoryUtils {
             }
         }
         return result;
-    }
-    
+    }    
     public static <T> Map<String, T> beansOfTypeIncludingAncestors(
             ListableBeanFactory lbf, Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
             throws BeansException {
@@ -170,29 +152,25 @@ public class BeanFactoryUtils {
             }
         }
         return result;
-    }
-    
+    }    
     public static <T> T beanOfTypeIncludingAncestors(ListableBeanFactory lbf, Class<T> type)
             throws BeansException {
 
         Map<String, T> beansOfType = beansOfTypeIncludingAncestors(lbf, type);
         return uniqueBean(type, beansOfType);
-    }
-    
+    }    
     public static <T> T beanOfTypeIncludingAncestors(
             ListableBeanFactory lbf, Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
             throws BeansException {
 
         Map<String, T> beansOfType = beansOfTypeIncludingAncestors(lbf, type, includeNonSingletons, allowEagerInit);
         return uniqueBean(type, beansOfType);
-    }
-    
+    }    
     public static <T> T beanOfType(ListableBeanFactory lbf, Class<T> type) throws BeansException {
         Assert.notNull(lbf, "ListableBeanFactory must not be null");
         Map<String, T> beansOfType = lbf.getBeansOfType(type);
         return uniqueBean(type, beansOfType);
-    }
-    
+    }    
     public static <T> T beanOfType(
             ListableBeanFactory lbf, Class<T> type, boolean includeNonSingletons, boolean allowEagerInit)
             throws BeansException {
@@ -201,7 +179,6 @@ public class BeanFactoryUtils {
         Map<String, T> beansOfType = lbf.getBeansOfType(type, includeNonSingletons, allowEagerInit);
         return uniqueBean(type, beansOfType);
     }
-
     
     private static String[] mergeNamesWithParent(String[] result, String[] parentResult, HierarchicalBeanFactory hbf) {
         if (parentResult.length == 0) {
@@ -215,16 +192,18 @@ public class BeanFactoryUtils {
             }
         }
         return StringUtils.toStringArray(merged);
-    }
-    
+    }    
     private static <T> T uniqueBean(Class<T> type, Map<String, T> matchingBeans) {
         int count = matchingBeans.size();
         if (count == 1) {
             return matchingBeans.values().iterator().next();
-        } else if (count > 1) {
+        }
+        else if (count > 1) {
             throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
-        } else {
+        }
+        else {
             throw new NoSuchBeanDefinitionException(type);
         }
     }
+
 }

@@ -1,15 +1,16 @@
 package com.t13max.ioc.beans.factory.support;
 
-import com.t13max.ioc.beans.BeansException;
+import com.t13max.ioc.beans.*;
 import com.t13max.ioc.beans.factory.*;
-import com.t13max.ioc.beans.factory.config.BeanDefinition;
-import com.t13max.ioc.beans.factory.config.BeanDefinitionHolder;
-import com.t13max.ioc.beans.factory.config.BeanPostProcessor;
-import com.t13max.ioc.beans.factory.config.ConfigurableBeanFactory;
+import com.t13max.ioc.beans.factory.config.*;
+import com.t13max.ioc.core.DecoratingClassLoader;
+import com.t13max.ioc.core.NamedThreadLocal;
 import com.t13max.ioc.core.ResolvableType;
+import com.t13max.ioc.core.convert.ConversionService;
+import com.t13max.ioc.core.log.LogMessage;
 import com.t13max.ioc.core.metrics.ApplicationStartup;
 import com.t13max.ioc.core.metrics.StartupStep;
-import com.t13max.ioc.utils.*;
+import com.t13max.ioc.util.*;
 
 import java.beans.PropertyEditor;
 import java.util.*;
@@ -856,11 +857,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         Scope previous = this.scopes.put(scopeName, scope);
         if (previous != null && previous != scope) {
             if (logger.isDebugEnabled()) {
-                logger.debug("Replacing scope '" + scopeName + "' from [" + previous + "] to [" + scope + "]");
+                logger.debug("Replacing scope '{}' from [{}] to [{}]", scopeName, previous, scope);
             }
         } else {
             if (logger.isTraceEnabled()) {
-                logger.trace("Registering scope '" + scopeName + "' with implementation [" + scope + "]");
+                logger.trace("Registering scope '{}' with implementation [{}]", scopeName, scope);
             }
         }
     }

@@ -1,7 +1,9 @@
 package com.t13max.ioc.aop.support;
 
 import com.t13max.ioc.aop.Advice;
-import com.t13max.ioc.utils.ObjectUtils;
+import com.t13max.ioc.aop.PointcutAdvisor;
+import com.t13max.ioc.core.Ordered;
+import com.t13max.ioc.util.ObjectUtils;
 
 import java.io.Serializable;
 
@@ -9,9 +11,8 @@ import java.io.Serializable;
  * @author t13max
  * @since 16:25 2026/1/16
  */
-public class AbstractPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
+public abstract class AbstractPointcutAdvisor implements PointcutAdvisor, Ordered, Serializable {
 
-    @Nullable
     private Integer order;
 
 
@@ -33,7 +34,7 @@ public class AbstractPointcutAdvisor implements PointcutAdvisor, Ordered, Serial
 
 
     @Override
-    public boolean equals(@Nullable Object other) {
+    public boolean equals( Object other) {
         return (this == other || (other instanceof PointcutAdvisor otherAdvisor &&
                 ObjectUtils.nullSafeEquals(getAdvice(), otherAdvisor.getAdvice()) &&
                 ObjectUtils.nullSafeEquals(getPointcut(), otherAdvisor.getPointcut())));

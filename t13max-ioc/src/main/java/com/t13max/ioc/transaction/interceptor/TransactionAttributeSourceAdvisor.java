@@ -3,7 +3,7 @@ package com.t13max.ioc.transaction.interceptor;
 import com.t13max.ioc.aop.Advice;
 import com.t13max.ioc.aop.Pointcut;
 import com.t13max.ioc.aop.support.AbstractPointcutAdvisor;
-import com.t13max.ioc.utils.Assert;
+import com.t13max.ioc.util.Assert;
 
 /**
  * @author t13max
@@ -17,29 +17,15 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 
     public TransactionAttributeSourceAdvisor() {
     }
-
-    /**
-     * Create a new TransactionAttributeSourceAdvisor.
-     * @param interceptor the transaction interceptor to use for this advisor
-     */
     public TransactionAttributeSourceAdvisor(TransactionInterceptor interceptor) {
         setTransactionInterceptor(interceptor);
     }
 
-
-    /**
-     * Set the transaction interceptor to use for this advisor.
-     */
     public void setTransactionInterceptor(TransactionInterceptor interceptor) {
         Assert.notNull(interceptor, "TransactionInterceptor must not be null");
         this.transactionInterceptor = interceptor;
         this.pointcut.setTransactionAttributeSource(interceptor.getTransactionAttributeSource());
     }
-
-    /**
-     * Set the {@link ClassFilter} to use for this pointcut.
-     * Default is {@link ClassFilter#TRUE}.
-     */
     public void setClassFilter(ClassFilter classFilter) {
         this.pointcut.setClassFilter(classFilter);
     }

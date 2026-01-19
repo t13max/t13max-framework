@@ -1,0 +1,105 @@
+package com.t13max.ioc.context.support;
+
+import com.t13max.ioc.core.DecoratingClassLoader;
+import com.t13max.ioc.core.OverridingClassLoader;
+import com.t13max.ioc.core.SmartClassLoader;
+import com.t13max.ioc.util.ReflectionUtils;
+import org.apache.logging.log4j.LogManager;
+
+import java.lang.reflect.Method;
+import java.security.ProtectionDomain;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+/**
+ * @Author: t13max
+ * @Since: 21:44 2026/1/16
+ */
+public class ContextTypeMatchClassLoader extends DecoratingClassLoader implements SmartClassLoader {
+
+    static {
+        ClassLoader.registerAsParallelCapable();
+    }
+
+
+    private static final Method findLoadedClassMethod;
+
+    static {
+        // Try to enable findLoadedClass optimization which allows us to selectively
+        // override classes that have not been loaded yet. If not accessible, we will
+        // always override requested classes, even when the classes have been loaded
+        // by the parent ClassLoader already and cannot be transformed anymore anyway.
+        Method method;
+        try {
+            method = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
+            ReflectionUtils.makeAccessible(method);
+        } catch (Throwable ex) {
+            // Typically a JDK 9+ InaccessibleObjectException...
+            // Avoid through JVM startup with --add-opens=java.base/java.lang=ALL-UNNAMED
+            method = null;
+            LogManager.getLogger(ContextTypeMatchClassLoader.class).debug("ClassLoader.findLoadedClass not accessible -> will always override requested class", ex);
+        }
+        findLoadedClassMethod = method;
+    }
+
+    private final Map<String, byte[]> bytesCache = new ConcurrentHashMap<>(256);
+
+
+    public ContextTypeMatchClassLoader(ClassLoader parent) {
+        super(parent);
+    }
+
+    @Override
+    public Class<?> loadClass(String name) throws ClassNotFoundException {
+        return new ContextOverridingClassLoader(getParent()).loadClass(name);
+    }
+
+    @Override
+    public boolean isClassReloadable(Class<?> clazz) {
+        return (clazz.getClassLoader() instanceof ContextOverridingClassLoader);
+    }
+
+    @Override
+    public Class<?> publicDefineClass(String name, byte[] b, ProtectionDomain protectionDomain) {
+        return defineClass(name, b, 0, b.length, protectionDomain);
+    }
+
+    private class ContextOverridingClassLoader extends OverridingClassLoader {
+
+        public ContextOverridingClassLoader(ClassLoader parent) {
+            super(parent);
+        }
+
+        @Override
+        protected boolean isEligibleForOverriding(String className) {
+            if (isExcluded(className) || ContextTypeMatchClassLoader.this.isExcluded(className)) {
+                return false;
+            }
+            if (findLoadedClassMethod != null) {
+                ClassLoader parent = getParent();
+                while (parent != null) {
+                    if (ReflectionUtils.invokeMethod(findLoadedClassMethod, parent, className) != null) {
+                        return false;
+                    }
+                    parent = parent.getParent();
+                }
+            }
+            return true;
+        }
+
+        @Override
+        protected Class<?> loadClassForOverriding(String name) throws ClassNotFoundException {
+            byte[] bytes = bytesCache.get(name);
+            if (bytes == null) {
+                bytes = loadBytesForClass(name);
+                if (bytes != null) {
+                    bytesCache.put(name, bytes);
+                } else {
+                    return null;
+                }
+            }
+            return defineClass(name, bytes, 0, bytes.length);
+        }
+    }
+
+}

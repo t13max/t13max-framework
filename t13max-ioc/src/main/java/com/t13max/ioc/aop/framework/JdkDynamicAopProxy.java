@@ -1,7 +1,15 @@
 package com.t13max.ioc.aop.framework;
 
-import com.t13max.ioc.utils.Assert;
-import com.t13max.ioc.utils.ClassUtils;
+import com.t13max.ioc.aop.AopInvocationException;
+import com.t13max.ioc.aop.RawTargetAccess;
+import com.t13max.ioc.aop.TargetSource;
+import com.t13max.ioc.aop.intecept.MethodInvocation;
+import com.t13max.ioc.aop.support.AopUtils;
+import com.t13max.ioc.core.DecoratingProxy;
+import com.t13max.ioc.util.Assert;
+import com.t13max.ioc.util.ClassUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,31 +24,16 @@ import java.util.List;
  * @since 16:48 2026/1/16
  */
 public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializable {
-
-    /** use serialVersionUID from Spring 1.2 for interoperability. */
     private static final long serialVersionUID = 5531744639992436476L;
 
 
     private static final String COROUTINES_FLOW_CLASS_NAME = "kotlinx.coroutines.flow.Flow";
 
     private static final boolean coroutinesReactorPresent = ClassUtils.isPresent("kotlinx.coroutines.reactor.MonoKt", JdkDynamicAopProxy.class.getClassLoader());
-
-    /** We use a static Log to avoid serialization issues. */
-    private static final Log logger = LogFactory.getLog(JdkDynamicAopProxy.class);
-
-    /** Config used to configure this proxy. */
+    private static final Logger logger = LogManager.getLogger(JdkDynamicAopProxy.class);
     private final AdvisedSupport advised;
-
-    /** Cached in {@link AdvisedSupport#proxyMetadataCache}. */
     private transient ProxiedInterfacesCache cache;
 
-
-    /**
-     * Construct a new JdkDynamicAopProxy for the given AOP configuration.
-     * @param config the AOP configuration as AdvisedSupport object
-     * @throws AopConfigException if the config is invalid. We try to throw an informative
-     * exception in this case, rather than let a mysterious failure happen later.
-     */
     public JdkDynamicAopProxy(AdvisedSupport config) throws AopConfigException {
         Assert.notNull(config, "AdvisedSupport must not be null");
         this.advised = config;
@@ -64,7 +57,7 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializ
     }
 
     @Override
-    public Object getProxy(@Nullable ClassLoader classLoader) {
+    public Object getProxy( ClassLoader classLoader) {
         if (logger.isTraceEnabled()) {
             logger.trace("Creating JDK dynamic proxy: " + this.advised.getTargetSource());
         }
@@ -73,15 +66,10 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializ
 
     @SuppressWarnings("deprecation")
     @Override
-    public Class<?> getProxyClass(@Nullable ClassLoader classLoader) {
+    public Class<?> getProxyClass( ClassLoader classLoader) {
         return Proxy.getProxyClass(determineClassLoader(classLoader), this.cache.proxiedInterfaces);
     }
-
-    /**
-     * Determine whether the JDK bootstrap or platform loader has been suggested ->
-     * use higher-level loader which can see Spring infrastructure classes instead.
-     */
-    private ClassLoader determineClassLoader(@Nullable ClassLoader classLoader) {
+    private ClassLoader determineClassLoader( ClassLoader classLoader) {
         if (classLoader == null) {
             // JDK bootstrap loader -> use spring-aop ClassLoader instead.
             return getClass().getClassLoader();
@@ -172,10 +160,10 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializ
             else if (retVal == null && returnType != void.class && returnType.isPrimitive()) {
                 throw new AopInvocationException("Null return value from advice does not match primitive return type for: " + method);
             }
-            if (coroutinesReactorPresent && KotlinDetector.isSuspendingFunction(method)) {
+            /*if (coroutinesReactorPresent && KotlinDetector.isSuspendingFunction(method)) {
                 return COROUTINES_FLOW_CLASS_NAME.equals(new MethodParameter(method, -1).getParameterType().getName()) ?
                         CoroutinesUtils.asFlow(retVal) : CoroutinesUtils.awaitSingleOrNull(retVal, args[args.length - 1]);
-            }
+            }*/
             return retVal;
         }
         finally {
@@ -190,14 +178,8 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializ
         }
     }
 
-
-    /**
-     * Equality means interfaces, advisors and TargetSource are equal.
-     * <p>The compared object may be a JdkDynamicAopProxy instance itself
-     * or a dynamic proxy wrapping a JdkDynamicAopProxy instance.
-     */
     @Override
-    public boolean equals(@Nullable Object other) {
+    public boolean equals( Object other) {
         if (other == this) {
             return true;
         }
@@ -224,10 +206,6 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializ
         // If we get here, otherProxy is the other AopProxy.
         return AopProxyUtils.equalsInProxy(this.advised, otherProxy.advised);
     }
-
-    /**
-     * Proxy uses the hash code of the TargetSource.
-     */
     @Override
     public int hashCode() {
         return JdkDynamicAopProxy.class.hashCode() * 13 + this.advised.getTargetSource().hashCode();
@@ -246,12 +224,6 @@ public class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializ
         this.cache = new ProxiedInterfacesCache(this.advised);
     }
 
-
-    /**
-     * Holder for the complete proxied interfaces and derived metadata,
-     * to be cached in {@link AdvisedSupport#proxyMetadataCache}.
-     * @since 6.1.3
-     */
     private static final class ProxiedInterfacesCache {
 
         final Class<?>[] proxiedInterfaces;

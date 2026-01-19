@@ -13,41 +13,17 @@ public class DefaultPointcutAdvisor extends AbstractGenericPointcutAdvisor imple
 
     private Pointcut pointcut = Pointcut.TRUE;
 
-
-    /**
-     * Create an empty DefaultPointcutAdvisor.
-     * <p>Advice must be set before using setter methods.
-     * Pointcut will normally be set also, but defaults to {@code Pointcut.TRUE}.
-     */
     public DefaultPointcutAdvisor() {
     }
-
-    /**
-     * Create a DefaultPointcutAdvisor that matches all methods.
-     * <p>{@code Pointcut.TRUE} will be used as Pointcut.
-     * @param advice the Advice to use
-     */
     public DefaultPointcutAdvisor(Advice advice) {
         this(Pointcut.TRUE, advice);
     }
-
-    /**
-     * Create a DefaultPointcutAdvisor, specifying Pointcut and Advice.
-     * @param pointcut the Pointcut targeting the Advice
-     * @param advice the Advice to run when Pointcut matches
-     */
     public DefaultPointcutAdvisor(Pointcut pointcut, Advice advice) {
         this.pointcut = pointcut;
         setAdvice(advice);
     }
 
-
-    /**
-     * Specify the pointcut targeting the advice.
-     * <p>Default is {@code Pointcut.TRUE}.
-     * @see #setAdvice
-     */
-    public void setPointcut(@Nullable Pointcut pointcut) {
+    public void setPointcut( Pointcut pointcut) {
         this.pointcut = (pointcut != null ? pointcut : Pointcut.TRUE);
     }
 

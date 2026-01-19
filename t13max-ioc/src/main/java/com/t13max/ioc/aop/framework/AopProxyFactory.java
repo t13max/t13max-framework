@@ -5,5 +5,6 @@ package com.t13max.ioc.aop.framework;
  * @since 16:45 2026/1/16
  */
 public interface AopProxyFactory {
+
     AopProxy createAopProxy(AdvisedSupport config) throws AopConfigException;
 }

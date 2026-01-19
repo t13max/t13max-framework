@@ -1,5 +1,7 @@
 package com.t13max.ioc.beans;
 
+import com.t13max.ioc.core.AttributeAccessorSupport;
+
 /**
  * @Author: t13max
  * @Since: 22:48 2026/1/15
